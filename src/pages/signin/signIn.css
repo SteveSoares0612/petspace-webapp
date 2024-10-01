@@ -11,7 +11,8 @@
 }
 
 .btn-color {
-  background-color: #DE595E;
+  background-color: #DE595E !important;
+  color: #FFFFFF !important;
 }
 
 .txtfield-border {
