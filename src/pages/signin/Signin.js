@@ -104,7 +104,7 @@ const SignIn = () => {
                 />
               </Form.Group>
               <div className="d-grid gap-2">
-              <Button variant="primary" size="lg" className="w-100 btn-color mt-5" onClick={handleSubmit}>
+              <Button size="lg" className="w-100 mt-5 btn-color" onClick={handleSubmit}>
                 Sign In
               </Button>
               </div>
