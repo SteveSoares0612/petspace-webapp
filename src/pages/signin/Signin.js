@@ -12,18 +12,32 @@ import './signIn.css';
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state for button
   const navigate = useNavigate();
   const { login } = useAuth(); // Get the login function from useAuth
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
 
-    // Handle sign-in logic here (e.g., API call)
-    if (email === 'user@example.com' && password === 'password') {
-      login(); // Call the login function to update authentication state
-      navigate('/'); // Redirect to home page
-    } else {
-      alert('Invalid email or password');
+  //   // Handle sign-in logic here (e.g., API call)
+  //   if (email === 'user@example.com' && password === 'password') {
+  //     login(); // Call the login function to update authentication state
+  //     navigate('/'); // Redirect to home page
+  //   } else {
+  //     alert('Invalid email or password');
+  //   }
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await login(email, password); // Call the login function with email and password
+      navigate('/'); // Redirect to the home page on successful login
+    } catch (error) {
+      console.error("THIS IS FROM SIGN IN: "+error); // Log any error (handled by AuthContext)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,7 +119,7 @@ const SignIn = () => {
               </Form.Group>
               <div className="d-grid gap-2">
               <Button size="lg" className="w-100 mt-5 btn-color" onClick={handleSubmit}>
-                Sign In
+                {loading ? 'Signing in...' : 'Sign In'}
               </Button>
               </div>
             </Form>
