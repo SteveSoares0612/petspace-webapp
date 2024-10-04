@@ -16,17 +16,6 @@ const SignIn = () => {
   const navigate = useNavigate();
   const { login } = useAuth(); // Get the login function from useAuth
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   // Handle sign-in logic here (e.g., API call)
-  //   if (email === 'user@example.com' && password === 'password') {
-  //     login(); // Call the login function to update authentication state
-  //     navigate('/'); // Redirect to home page
-  //   } else {
-  //     alert('Invalid email or password');
-  //   }
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

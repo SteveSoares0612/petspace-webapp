@@ -10,7 +10,7 @@ function AppNavbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    logout("test2@gmail.com");
     navigate('/signin');
   };
 
