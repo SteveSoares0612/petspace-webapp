@@ -1,6 +1,7 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 // Create AuthContext
 const AuthContext = createContext();
@@ -82,7 +83,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => setIsAuthenticated(false); // Update state to not authenticated
+  const logout = async (email) => {
+    try {
+      // Extract the XSRF token from cookies
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
+      console.log("TOKEN: " + token);
+
+      if (!token) {
+        throw new Error('CSRF token not found in cookies');
+      }
+
+      // Step 2: Send the login request using Axios
+      const response = await axios.post(
+        BASE_URL + '/api/logout',
+        { email }, // Send credentials in request body
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': decodeURIComponent(token), // Set the XSRF token in the headers
+          },
+          withCredentials: true, // Include cookies for authentication
+        }
+      );
+
+      if (response.status !== 200) {
+        console.error("Invalid email or password");
+        throw new Error('Invalid email or password');
+      }
+
+      const data = response.data;
+      setIsAuthenticated(false); // Set authentication state to true
+      setAuthError(null); 
+      console.info(data);
+    } catch (error) {
+      setAuthError(error.message); // Set error message if login fails
+      setIsAuthenticated(false);
+    }
+  };
+  
+  useEffect(() => {
+    const token = document.cookie.split('; ').find((row) => row.startsWith('XSRF-TOKEN='))
+      ?.split('=')[1];
+
+    if (token) {
+      setIsAuthenticated(true); // User is considered authenticated
+    }
+  });
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, authError, user }}>
