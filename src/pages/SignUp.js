@@ -18,7 +18,8 @@ import "./signin/signIn.css";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [fname, setfName] = useState("");
+  const [lname, setlName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -63,7 +64,7 @@ const SignUp = () => {
 
     // Call the sign-up API function (placeholder)
     try {
-      const success = await signUp(name, email, password); // Call the login function
+      const success = await signUp(fname, lname, email, password); // Call the login function
 
       // Use the success value to determine navigation
       if (success) {
@@ -115,6 +116,30 @@ const SignUp = () => {
                 <b>{error}</b>
               </p>
             )}
+            <Form.Group controlId="formBasicName" className="mt-3">
+                <Form.Label>First Name</Form.Label>
+                <Form.Control
+                  className="txtfield-border"
+                  size="lg"
+                  type="text"
+                  placeholder="Enter First Name"
+                  value={fname}
+                  onChange={(e) => setfName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+              <Form.Group controlId="formBasicName" className="mt-3">
+                <Form.Label>Last Name</Form.Label>
+                <Form.Control
+                  className="txtfield-border"
+                  size="lg"
+                  type="text"
+                  placeholder="Enter Last Name"
+                  value={lname}
+                  onChange={(e) => setlName(e.target.value)}
+                  required
+                />
+              </Form.Group>
             <Form onSubmit={handleSignUp}>
               <Form.Group controlId="formBasicEmail" className="mt-3">
                 <Form.Label>Email address</Form.Label>
@@ -125,19 +150,6 @@ const SignUp = () => {
                   placeholder="Enter email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group controlId="formBasicName" className="mt-3">
-                <Form.Label>Full Name</Form.Label>
-                <Form.Control
-                  className="txtfield-border"
-                  size="lg"
-                  type="text"
-                  placeholder="Enter Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
                   required
                 />
               </Form.Group>

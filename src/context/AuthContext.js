@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   };
   
 
-  const signUp = async (name, email, password) => {
+  const signUp = async (first_name, last_name, email, password) => {
     const cookies = document.cookie.split("; ");
       for (let cookie of cookies) {
         const cookieName = cookie.split("=")[0];
@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
       // Step 2: Send the login request using Axios
       const response = await axios.post(
         BASE_URL + '/api/register',
-        { name, email, password }, // Send credentials in request body
+        { first_name, last_name, email, password }, // Send credentials in request body
         {
           headers: {
             'Content-Type': 'application/json',

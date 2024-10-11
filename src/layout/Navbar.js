@@ -39,7 +39,7 @@ function AppNavbar() {
           {/* Authentication Links on the right */}
           <Nav className="ml-auto">
             {isAuthenticated ? (
-              <Nav.Link onClick={handleLogout}><b>{'Welcome ' + user.name}</b> | Sign Out</Nav.Link>
+              <Nav.Link onClick={handleLogout}><b>{'Welcome ' + user.first_name}</b> | Sign Out</Nav.Link>
             ) : (
               <>
                 <Nav.Link as={Link} to="/signin">Sign In</Nav.Link>
