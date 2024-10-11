@@ -87,6 +87,11 @@ export const AuthProvider = ({ children }) => {
   
 
   const signUp = async (name, email, password) => {
+    const cookies = document.cookie.split("; ");
+      for (let cookie of cookies) {
+        const cookieName = cookie.split("=")[0];
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+      }
     try {
       // Step 1: Fetch the CSRF token.
       await getCsrfToken();
@@ -116,22 +121,25 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      if (response.status !== 200) {
+      if (response.status === 200) {
         const data = response.data;
-        console.error("THIS IS THE ERROR "+data.message);
-        // throw new Error('Invalid email or password');
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        setIsAuthenticated(true);
+        setAuthError(null); // Clear any existing error
+        return true; // Return true for successful login
+      } else {
+        throw new Error('Login failed: Invalid response status');
       }
-
-      const data = response.data;
-      localStorage.setItem('user', JSON.stringify(data.user)); // Store user data in localStorage
-      setUser(data.user); // Store user details from response
-      setIsAuthenticated(true); // Set authentication state to true
-      setAuthError(null); // Clear any existing error
-      console.info(data.user);
-      setUser(data.user)
     } catch (error) {
-      setAuthError(error.message); // Set error message if login fails
-      setIsAuthenticated(false);
+    
+      if (error.response) {
+        setAuthError(error.response.data.message || "Login failed");
+      } else {
+        setAuthError("An unexpected error occurred: " + error.message);
+      }
+      setIsAuthenticated(false); // Set authentication state to false
+      return false; // Return false for failed login
     }
   };
 
@@ -177,6 +185,7 @@ export const AuthProvider = ({ children }) => {
   };
   
   useEffect(() => {
+    setAuthError(null)
     const storedUser = localStorage.getItem('user');
 
     if (storedUser) {
@@ -189,7 +198,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, authError, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, signUp, logout, authError, user }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-import { Container, Button, Row, Col, Carousel, Form, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Assuming you have a useAuth hook for signing up
+import {
+  Container,
+  Button,
+  Row,
+  Col,
+  Carousel,
+  Form,
+  Alert,
+} from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Assuming you have a useAuth hook for signing up
 
-import image1 from "../assets/images/CarouselImage1.png"; 
+import image1 from "../assets/images/CarouselImage1.png";
 import image2 from "../assets/images/CarouselImage2.png";
 import image3 from "../assets/images/CarouselImage3.png";
-import './signin/signIn.css';
+import "./signin/signIn.css";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -16,13 +24,18 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for button
   const navigate = useNavigate();
-  const { signUp } = useAuth(); // Assume signUp comes from useAuth
+  const { signUp, authError } = useAuth(); // Assume signUp comes from useAuth
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
 
-    const specialCharacterRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    const specialCharacterRegex =
+      /^(?=.*[!@#$%^&*(),.?{}|<>])(?=.*[^":])[\s\S]{8,}$/;
+
+    if (authError) {
+      setError(authError);
+    }
 
     // Basic validation
     if (!email) {
@@ -42,20 +55,27 @@ const SignUp = () => {
       return;
     }
     if (!specialCharacterRegex.test(password)) {
-      setError("Password must contain at least one special character.");
+      setError(
+        "Password must contain at least one special character. (eg: #,@,$,!)"
+      );
       return;
     }
 
     // Call the sign-up API function (placeholder)
     try {
-      setLoading(true);
-      // await signUp(name, email, password); // Assume this is your signup logic
-      // navigate('/'); // Redirect to home page after sign-up
-      console.log("SIGNED UP")
+      const success = await signUp(name, email, password); // Call the login function
+
+      // Use the success value to determine navigation
+      if (success) {
+        console.log("Registration successful, navigating to home");
+        navigate("/"); // Redirect to home page
+      } else {
+        console.log("Registration failed, not navigating");
+      }
     } catch (error) {
-      setError("Failed to sign up. Please try again.");
+      console.error("Registration failed: ", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -69,25 +89,13 @@ const SignUp = () => {
         >
           <Carousel fade="true">
             <Carousel.Item>
-              <img
-                className="d-block w-100"
-                src={image1} 
-                alt="First slide"
-              />
+              <img className="d-block w-100" src={image1} alt="First slide" />
             </Carousel.Item>
             <Carousel.Item>
-              <img
-                className="d-block w-100"
-                src={image2}
-                alt="Second slide"
-              />
+              <img className="d-block w-100" src={image2} alt="Second slide" />
             </Carousel.Item>
             <Carousel.Item>
-              <img
-                className="d-block w-100"
-                src={image3}
-                alt="Third slide"
-              />
+              <img className="d-block w-100" src={image3} alt="Third slide" />
             </Carousel.Item>
           </Carousel>
         </Col>
@@ -98,15 +106,15 @@ const SignUp = () => {
           className="d-flex align-items-center justify-content-center bg-right"
         >
           <div className="w-100 ms-3">
-            <h2 className="text-start">Hey there! Welcome!
-            </h2>
-            <p className="text-start mt-3">
-             Create your account to sign up.
-            </p>
+            <h2 className="text-start">Hey there! Welcome!</h2>
+            <p className="text-start mt-3">Create your account to register with PetSpace!.</p>
 
             {/* Display error if any */}
-            {error && <p className="text-start mt-3 text-danger"><b>{error}</b></p>}
-
+            {error && (
+              <p className="text-start mt-3 text-danger">
+                <b>{error}</b>
+              </p>
+            )}
             <Form onSubmit={handleSignUp}>
               <Form.Group controlId="formBasicEmail" className="mt-3">
                 <Form.Label>Email address</Form.Label>
@@ -159,16 +167,23 @@ const SignUp = () => {
                   required
                 />
               </Form.Group>
-
-              <div className="d-grid gap-2">
+              <div className="d-grid">
                 <Button
                   size="lg"
                   className="w-100 mt-5 btn-color"
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? "Signing up..." : "Sign Up"}
+                  {loading ? "Signing up..." : "Register"}
                 </Button>
+              </div>
+              <div className="text-center mt-2">
+                <small>
+                  Already have an account?{" "}
+                  <a href="/signin" className="link-color">
+                    Sign In
+                  </a>
+                </small>
               </div>
             </Form>
           </div>

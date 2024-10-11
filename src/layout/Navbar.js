@@ -30,9 +30,10 @@ function AppNavbar() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto"> {/* Align main links to the left */}
             <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/settings">Settings</Nav.Link>
-            <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
+            <Nav.Link as={Link} to="/events">Events</Nav.Link>
             <Nav.Link as={Link} to="/health">My Health</Nav.Link>
+            <Nav.Link as={Link} to="/profile">Shop</Nav.Link>
+            <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
           </Nav>
 
           {/* Authentication Links on the right */}
@@ -42,7 +43,7 @@ function AppNavbar() {
             ) : (
               <>
                 <Nav.Link as={Link} to="/signin">Sign In</Nav.Link>
-                <Nav.Link as={Link} to="/signup">Sign Up</Nav.Link>
+                <Nav.Link as={Link} to="/signup">Register</Nav.Link>
               </>
             )}
           </Nav>

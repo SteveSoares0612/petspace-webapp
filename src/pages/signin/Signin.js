@@ -19,12 +19,12 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // Show loading state
-  
+
     try {
       const success = await login(email, password); // Call the login function
-  
+
       // Use the success value to determine navigation
-      if (success) { 
+      if (success) {
         console.log("Login successful, navigating to home");
         navigate("/"); // Redirect to home page
       } else {
@@ -36,7 +36,6 @@ const SignIn = () => {
       setLoading(false); // Reset loading state
     }
   };
-  
 
   return (
     <Container className="vh-100 bg-dark">
@@ -46,21 +45,22 @@ const SignIn = () => {
           md={6}
           className="d-none d-md-flex align-items-center justify-content-center bg-left"
         >
-          <Carousel fade="true">
+          <Carousel fade="" variant="dark">
             <Carousel.Item>
               <img
                 className="d-block w-100"
                 src={image1} // Replace with your image source
                 alt="First slide"
               />
+              <Carousel.Caption className="mt-5 text-dark text-center">
+                <b>Track. Connect. Share.</b>
+                <p>
+                  Easily discover, book, and sign up for pet services or fun
+                  events with just a few clicks.
+                </p>
+              </Carousel.Caption>
               {/* <p className="mt-0 txt-color text-center">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
+                Track. Connect. Share.
               </p> */}
             </Carousel.Item>
             <Carousel.Item>
@@ -69,15 +69,13 @@ const SignIn = () => {
                 src={image2} // Replace with your image source
                 alt="Second slide"
               />
-              {/* <p className="mt-0 txt-color text-center">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </p> */}
+              <Carousel.Caption className="mt-5 text-dark text-center">
+                <b>Manage All Your Pet’s Healthcare in One Place</b>
+                <p>
+                  Track your pet's health, schedule vet appointments, and store
+                  all medical records in one convenient location.
+                </p>
+              </Carousel.Caption>
             </Carousel.Item>
             <Carousel.Item>
               <img
@@ -85,15 +83,14 @@ const SignIn = () => {
                 src={image3} // Replace with your image source
                 alt="Third slide"
               />
-              {/* <p className="mt-0 txt-color text-center">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </p> */}
+
+              <Carousel.Caption className="mt-5 text-dark text-center">
+                <b>Explore and Book Pet Services & Events Instantly</b>
+                <p>
+                  Easily discover, book, and sign up for pet services or fun
+                  events with just a few clicks.
+                </p>
+              </Carousel.Caption>
             </Carousel.Item>
           </Carousel>
         </Col>
@@ -107,9 +104,12 @@ const SignIn = () => {
             <h2 className="text-start">Hey! Welcome Back!</h2>
             <p className="text-start mt-3">
               Please Enter Username and password to sign in!
-              username@example.com | password
             </p>
-            {authError && <p className="text-start mt-3 text-danger"><b>{authError}</b></p>}
+            {authError && (
+              <p className="text-start mt-3 text-danger">
+                <b>{authError}</b>
+              </p>
+            )}
             <Form onSubmit={handleSubmit}>
               <Form.Group controlId="formBasicEmail" className="mt-3">
                 <Form.Label>Email address</Form.Label>
@@ -136,7 +136,7 @@ const SignIn = () => {
                   required
                 />
               </Form.Group>
-              <div className="d-grid gap-2">
+              {/* <div className="d-grid gap-2">
                 <Button
                   size="lg"
                   className="w-100 mt-5 btn-color"
@@ -144,6 +144,25 @@ const SignIn = () => {
                 >
                   {loading ? "Signing in..." : "Sign In"}
                 </Button>
+              </div> */}
+              <div className="d-grid">
+                <Button
+                  size="lg"
+                  className="w-100 mt-5 btn-color"
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? "Signing in..." : "Sign In"}
+                </Button>
+              </div>
+              <div className="text-center mt-2">
+                <small>
+                  Don't have an account?{" "}
+                  <a href="/signup" className="link-color">
+                    Register
+                  </a>
+                </small>
               </div>
             </Form>
           </div>

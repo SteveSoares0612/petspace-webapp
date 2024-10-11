@@ -1,7 +1,7 @@
 // src/components/Home.js
 import React from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { FaChevronRight, FaSearchLocation } from "react-icons/fa"; // Import the right chevron icon
+import { FaChevronRight, FaSearchLocation } from "react-icons/fa"; 
 
 import dog1 from "../assets/images/dog1.jpg";
 import dog2 from "../assets/images/dog2.jpg";
