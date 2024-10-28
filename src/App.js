@@ -11,6 +11,7 @@ import Health from './pages/Health';
 import SignIn from './pages/signin/Signin';
 import SignUp from './pages/SignUp'; 
 import { useAuth } from './context/AuthContext'; // Use useAuth
+import LandingPage from './pages/landingPage/LandingPage';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth(); // Get authentication state from context
@@ -20,7 +21,8 @@ const AppRoutes = () => {
       <Row>
         <Col md={12}>
           <Routes>
-            <Route path="/" element={isAuthenticated ? <Home /> : <SignIn />} />
+            <Route path="/" element={<LandingPage /> } />
+            <Route path="/home" element={isAuthenticated ? <Home /> : <SignIn />} />
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
             <Route path="/profile" element={isAuthenticated ? <Profile /> : <SignIn />} />
             <Route path="/health" element={isAuthenticated ? <Health /> : <SignIn />} />
