@@ -18,44 +18,6 @@ function AppNavbar() {
     console.log(user)
   })
   
-  
-  // return (
-  //   <Navbar bg="light" expand="lg">
-  //     <Container>
-  //       {/* Logo */}
-  //       <Navbar.Brand href="/">
-  //         <img src={logo} width={100} alt="Logo" />
-  //       </Navbar.Brand>
-
-  //       {/* Hamburger menu for mobile */}
-  //       <Navbar.Toggle aria-controls="basic-navbar-nav" />
-
-  //       {/* Links */}
-  //       <Navbar.Collapse id="basic-navbar-nav">
-  //         <Nav className="me-auto"> {/* Align main links to the left */}
-  //           <Nav.Link as={Link} to="/home">Home</Nav.Link>
-  //           <Nav.Link as={Link} to="/events">Events</Nav.Link>
-  //           <Nav.Link as={Link} to="/health">My Health</Nav.Link>
-  //           <Nav.Link as={Link} to="/profile">Shop</Nav.Link>
-  //           <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
-  //         </Nav>
-
-  //         {/* Authentication Links on the right */}
-  //         <Nav className="ml-auto">
-  //           {isAuthenticated ? (
-  //             <Nav.Link onClick={handleLogout}><b>{'Welcome ' + user}</b> | Sign Out</Nav.Link>
-  //           ) : (
-  //             <>
-  //               <Nav.Link as={Link} to="/signin">Sign In</Nav.Link>
-  //               <Nav.Link as={Link} to="/signup">Register</Nav.Link>
-  //             </>
-  //           )}
-  //         </Nav>
-  //       </Navbar.Collapse>
-  //     </Container>
-  //   </Navbar>
-  // );
-
   return (
     <Navbar bg="light" expand="lg" className="py-3">
     <Container>
