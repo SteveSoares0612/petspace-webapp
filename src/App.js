@@ -6,7 +6,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import AppNavbar from './layout/Navbar';
 import Home from './pages/Home';
 import Events from './pages/Events';
-import Profile from './pages/Profile';
+import Profile from './pages/profile/Profile';
 import Health from './pages/Health';
 import SignIn from './pages/signin/Signin';
 import SignUp from './pages/SignUp'; 
