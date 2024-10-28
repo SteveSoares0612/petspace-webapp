@@ -32,6 +32,8 @@ function AppNavbar() {
             <Nav.Link as={Link} to="/settings">Settings</Nav.Link>
             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
             <Nav.Link as={Link} to="/health">My Health</Nav.Link>
+            <Nav.Link as={Link} to="/events">Events</Nav.Link>
+            <Nav.Link as={Link} to="/managepets">Manage Pets</Nav.Link>
           </Nav>
 
           {/* Authentication Links on the right */}
