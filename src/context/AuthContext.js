@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
         withCredentials: true, // Required for cookies to be sent
       });
       if (response.status === 204) {
-        // The CSRF token has been successfully fetched
         console.log('CSRF token fetched successfully');
       } else {
         throw new Error('Failed to fetch CSRF token');
@@ -35,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error fetching CSRF token:', error);
     }
   };
-
+  
   const login = async (email, password) => {
     try {
       // Fetch the CSRF token
@@ -64,9 +63,23 @@ export const AuthProvider = ({ children }) => {
       );
   
       if (response.status === 200) {
-        const data = response.data;
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
+        const data = response.data.data; // Access the 'data' object in the response
+        const userData = {
+          id: data.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          email_verified_at: data.email_verified_at,
+          role: data.role,
+          dob: data.dob,
+          gender: data.gender,
+          is_form_filled: data.is_form_filled,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+        };
+  
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
         setIsAuthenticated(true);
         setAuthError(null); // Clear any existing error
         return true; // Return true for successful login
@@ -74,7 +87,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Login failed: Invalid response status');
       }
     } catch (error) {
-    
       if (error.response) {
         setAuthError(error.response.data.message || "Login failed");
       } else {
@@ -83,8 +95,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false); // Set authentication state to false
       return false; // Return false for failed login
     }
-  };
-  
+  };  
 
   const signUp = async (first_name, last_name, email, password) => {
     const cookies = document.cookie.split("; ");
@@ -183,6 +194,40 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
     }
   };
+
+  const updateUser = async (updatedUserData) => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
+      console.log("TOKEN: " + token);
+
+      const response = await axios.put(
+        `${BASE_URL}/api/account/update/${user.id}`,
+        updatedUserData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        const updatedUser = response.data.data;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser); // Update the user data in context
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
   
   useEffect(() => {
     setAuthError(null)
@@ -198,7 +243,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     
-    <AuthContext.Provider value={{ isAuthenticated, login, signUp, logout, authError, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, signUp, logout, updateUser, authError, user }}>
       {children}
     </AuthContext.Provider>
   );
