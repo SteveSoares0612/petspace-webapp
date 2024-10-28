@@ -1,5 +1,6 @@
 .bg-left {
     background-color: #FFFFCD;
+   
   }
 
 .txt-color{
@@ -12,9 +13,43 @@
 
 .btn-color {
   background-color: #DE595E !important;
+  border-color: #DE595E !important;
   color: #FFFFFF !important;
 }
 
 .txtfield-border {
   border-color: #B4D1D0;
+}
+
+.card-txt-date{
+  color: #FFB459;
+  font-size: 13px;
+  margin-top: 0;
+  margin-bottom: 0.2rem;
+}
+
+.card-txt-location{
+  color: #8b8b8b;
+  font-size: 13px;
+  margin-top: 0;
+  margin-bottom: 0.2rem;
+}
+
+.card-txt-price{
+  color: #8b8b8b;
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.2rem;
+}
+
+.yellow-txt {
+  color: #FFB459;
+}
+
+.txt-muted{
+  color: #8b8b8b;
+}
+
+.link-color{
+  color: #DE595E !important;
 }
