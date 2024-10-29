@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import Events from './pages/Events';
 import Profile from './pages/profile/Profile';
 import Health from './pages/Health';
+import Events from './pages/Events';
+import ManagePets from './pages/ManagePets';
 import SignIn from './pages/signin/Signin';
 import SignUp from './pages/SignUp'; 
 import { useAuth } from './context/AuthContext'; // Use useAuth
@@ -24,10 +26,11 @@ const AppRoutes = () => {
             <Route path="/" element={<LandingPage /> } />
             <Route path="/home" element={isAuthenticated ? <Home /> : <SignIn />} />
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
-            <Route path="/profile" element={isAuthenticated ? <Profile /> : <SignIn />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/health" element={isAuthenticated ? <Health /> : <SignIn />} />
             <Route path="/signin" element={<SignIn />} /> 
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/managepets" element={<ManagePets />} />
           </Routes>
         </Col>
       </Row>
