@@ -205,7 +205,7 @@ export const AuthProvider = ({ children }) => {
       console.log("TOKEN: " + token);
 
       const response = await axios.put(
-        `${BASE_URL}/api/account/update/${user.id}`,
+        `${BASE_URL}/web/account/update/${user.id}`,
         updatedUserData,
         {
           headers: {
@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         const updatedUser = response.data.data;
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser); // Update the user data in context
+        setUser(updatedUser);
       } else {
         throw new Error('Failed to update profile');
       }
