@@ -6,10 +6,9 @@ import { Container, Row, Col } from 'react-bootstrap';
 import AppNavbar from './layout/Navbar';
 import Footer from './layout/Footer'
 import Home from './pages/Home';
-import Events from './pages/Events';
 import Profile from './pages/profile/Profile';
 import Health from './pages/Health';
-import Events from './pages/Events';
+import Events from './pages/Events/Events';
 import ManagePets from './pages/ManagePets';
 import SignIn from './pages/signin/Signin';
 import SignUp from './pages/SignUp'; 
