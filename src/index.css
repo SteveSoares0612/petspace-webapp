@@ -1,3 +1,10 @@
+:root {
+  --bs-danger: #DD595D !important;  /* Background color */
+  --bs-danger-bg: #DD595D !important;  /* Background color */
+  --bs-danger-border-color : #DD595D !important;  /* Border color */
+  --bs-danger-text: white !important;  /* Text color */
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

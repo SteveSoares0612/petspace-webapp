@@ -4,6 +4,11 @@ import { Navbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/images/logo.png';
 import { useAuth } from '../context/AuthContext';
+import {FaSignOutAlt, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import ProfileIcon from '../assets/images/myprofileicon.png'; 
+import editPetsIcon from '../assets/images/editpets.png'; 
+import FamilyIcon from '../assets/images/famiylIcon.png'; 
+import LogoutIcon from '../assets/images/logout.png'; 
 
 function AppNavbar() {
   const { isAuthenticated, logout, user } = useAuth();
@@ -23,7 +28,7 @@ function AppNavbar() {
     <Container>
       {/* Logo */}
       <Navbar.Brand as={Link} to="/">
-        <img src={logo} width={90} alt="Logo" />
+        <img src={logo} width={120} alt="Logo" />
       </Navbar.Brand>
 
       {/* Hamburger menu for mobile */}
@@ -46,21 +51,34 @@ function AppNavbar() {
               id="user-dropdown"
               align="end"
             >
-              <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/profile">
+                <img src={ProfileIcon} alt="My Profile" className="me-2" width={16} height={16} /> Update Profile
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/family">
+                <img src={FamilyIcon} alt="My Family" className="me-2" width={16} height={16} /> My Family
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/managepets">
+                <img src={editPetsIcon} alt="Manage Pets" className="me-2" width={16} height={16} /> Manage Pets
+              </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item onClick={handleLogout} className="text-danger">
-                Sign Out
+                <img src={LogoutIcon} alt="Signout" className="me-2" width={16} height={16} /> Sign Out
               </NavDropdown.Item>
             </NavDropdown>
           ) : (
             <NavDropdown title="Guest" id="account-dropdown" align="end">
-              <NavDropdown.Item as={Link} to="/signin">Sign In</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/signin">
+                <FaSignInAlt className="me-2" /> Sign In
+              </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/signup" className="text-danger">
-                Register
+                <FaUserPlus className="me-2" /> Register
               </NavDropdown.Item>
             </NavDropdown>
           )}
         </Nav>
+
       </Navbar.Collapse>
     </Container>
   </Navbar>

@@ -2,6 +2,13 @@
   text-align: center;
 }
 
+:root {
+  --bs-danger: #DD595D !important;  /* Background color */
+  --bs-danger-bg: #DD595D !important;  /* Background color */
+  --bs-danger-border-color : #DD595D !important;  /* Border color */
+  --bs-danger-text: white !important;  /* Text color */
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -35,4 +42,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+html, body {
+  height: 100%; /* Ensure the body takes the full height of the viewport */
+  margin: 0; /* Remove default margin */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure it takes at least the full height of the viewport */
+}
+
+.flex-grow-1 {
+  flex-grow: 1; /* This allows the main section to take the available space */
+}
+
+footer {
+  background-color: #f8f9fa; /* Adjust as needed */
+  padding: 20px; /* Adjust padding as needed */
 }

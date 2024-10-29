@@ -9,11 +9,10 @@ import section2image from "../../assets/images/section2img.png";
 import section3image from "../../assets/images/section3img.png";
 import section4image from "../../assets/images/section4img.png";
 import sideLogo from "../../assets/images/sideLogo.png";
-import appstore from "../../assets/images/appstore.png";
-import playstore from "../../assets/images/playstore.png";
 
 import checkList1 from "../../assets/images/CheckCircle.png";
 import checkList2 from "../../assets/images/CheckCircle2.png";
+import store from "../../assets/images/appandgoogle.png";
 
 
 const LandingPage = () => {
@@ -33,8 +32,7 @@ const LandingPage = () => {
           <Col md={7} className="text-start">
             <h1 className='h1-size'>Simplifying Pet Care, In One App.</h1>
             <p style={{fontSize: '1.5rem'}}>Track. Connect. Share.</p>
-            <img src={playstore}  className="me-2 img-fluid" style={{maxWidth: '22.5%'}}></img>
-            <img src={appstore}  className="img-fluid" style={{maxWidth: '20%'}}></img>
+            <img src={store}  className="img-fluid" style={{maxWidth: '50%'}}></img>
           </Col>
           
         </Row>
@@ -126,9 +124,7 @@ const LandingPage = () => {
             </Col>    
         </Row>
       </section>
-      <Footer></Footer>
     </Container>
-    
   );
 };
 

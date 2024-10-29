@@ -43,13 +43,18 @@ function Profile() {
   };
 
   return (
-    <Container className="p-4">
+    <Container className="p-4 mt-3 ms-0">
+            <Row>
+                <Col className="d-flex justify-content-between align-items-center">
+                    <h2>My Profile</h2>
+                </Col>
+            </Row>
       {/* Profile Info Section */}
       <Row>
-        <Col md={2} className="text-center me-5">
+        <Col md={2} className="text-center me-5 mt-4">
           <Image src="https://img.freepik.com/free-photo/close-up-young-person-barbeque_23-2149271990.jpg" roundedCircle width={210} height={190} />
         </Col>
-        <Col md={8} className="text-start">
+        <Col md={8} className="text-start mt-4">
           <h2>{user.first_name} {user.last_name}</h2>
           <p>Female<br />{user.email}<br />{'user.address'}<br />12 Pet Events Attended</p>
           <Button className="me-2 custom">4 Pets</Button>
