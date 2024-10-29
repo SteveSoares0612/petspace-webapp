@@ -49,30 +49,12 @@ function Profile() {
 
   return (
     <Container className="p-4">
-      {/* Loading Overlay */}
-      {/* <Overlay show={isLoading} target={document.body} placement="center">
-        <div style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          backgroundColor: 'rgba(222, 89, 94, 0.8)', 
-          zIndex: 9999, 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center' 
-        }}>
-          <Spinner animation="border" role="status" variant="light">
-          </Spinner>
-        </div>
-      </Overlay> */}
       {/* Profile Info Section */}
       <Row>
-        <Col md={2} className="text-center me-5">
+        <Col md={2} className="text-center me-5 mt-4">
           <Image src="https://img.freepik.com/free-photo/close-up-young-person-barbeque_23-2149271990.jpg" roundedCircle width={210} height={190} />
         </Col>
-        <Col md={8} className="text-start">
+        <Col md={8} className="text-start mt-4">
           <h2>{user.first_name} {user.last_name}</h2>
           <p>Female<br />{user.email}<br />{'user.address'}<br />12 Pet Events Attended</p>
           <Button className="me-2 custom">4 Pets</Button>

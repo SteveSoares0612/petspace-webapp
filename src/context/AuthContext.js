@@ -16,6 +16,9 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(null); // Store any error during authentication
   const [user, setUser] = useState(""); // To store user details after login
+  const [familyMembers, setFamilyMembers] = useState([]); //Get family members
+  const [petList, setPetList] = useState([]); //Get List of pets
+
   
   const BASE_URL = "http://localhost:8000";
 
@@ -113,7 +116,6 @@ export const AuthProvider = ({ children }) => {
         .find((row) => row.startsWith('XSRF-TOKEN='))
         ?.split('=')[1];
 
-      console.log("TOKEN: " + token);
 
       if (!token) {
         throw new Error('CSRF token not found in cookies');
@@ -163,7 +165,6 @@ export const AuthProvider = ({ children }) => {
         .find((row) => row.startsWith('XSRF-TOKEN='))
         ?.split('=')[1];
 
-      console.log("TOKEN: " + token);
 
       if (!token) {
         throw new Error('CSRF token not found in cookies');
@@ -202,7 +203,6 @@ export const AuthProvider = ({ children }) => {
         .find((row) => row.startsWith('XSRF-TOKEN='))
         ?.split('=')[1];
 
-      console.log("TOKEN: " + token);
       const response = await axios.put(
         `${BASE_URL}/web/account/update/${user.id}`,
         updatedUserData,
@@ -227,6 +227,117 @@ export const AuthProvider = ({ children }) => {
       throw error; // Throw error so it can be caught by the calling function
     }
   };
+
+  const getFamilyMembers = async () => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+  
+      const response = await axios.get(`${BASE_URL}/web/account/member-list`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        setFamilyMembers(response.data.data); // Extracting the data array directly
+      } else {
+        throw new Error('Failed to fetch family members');
+      }
+    } catch (error) {
+      console.error('Error fetching family members:', error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
+  
+  
+
+  const addFamilyMember = async (email) => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+  
+      const response = await axios.post(`${BASE_URL}/web/account/member/add`, 
+        { email }, // Data to be sent
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+  
+      if (response.status === 200) { 
+        setFamilyMembers(response.data); 
+      } else {
+        throw new Error('Failed to add family member');
+      }
+    } catch (error) {
+      console.error('Error adding family member:', error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
+
+  const deleteFamilyMember = async (id) => {
+    try {
+        const token = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('XSRF-TOKEN='))
+            ?.split('=')[1];
+
+        const response = await axios.delete(`${BASE_URL}/web/account/member/delete/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': decodeURIComponent(token),
+            },
+            withCredentials: true,
+        });
+
+        if (response.status === 200) { 
+            return true;
+        } else {
+            throw new Error('Failed to delete family member');
+        }
+    } catch (error) {
+        console.error('Error deleting family member:', error);
+        throw error; 
+    }
+  };
+
+  const getPetList = async () => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+  
+      console.log("TOKEN: " + token);
+      const response = await axios.post(`${BASE_URL}/web/pet/pet-list`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        setPetList(response.data.data); // Extracting the data array directly
+      } else {
+        throw new Error('Failed to fetch list of pets');
+      }
+    } catch (error) {
+      console.error('Error fetching list of pets:', error);
+      throw error; 
+    }
+  };
+  
   
   useEffect(() => {
     setAuthError(null)
@@ -240,9 +351,37 @@ export const AuthProvider = ({ children }) => {
     }
   },[]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+        getFamilyMembers();
+    }
+  }, [isAuthenticated]);
+
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //       getPetList();
+  //   }
+  // }, [isAuthenticated]);
+
+
+  const values = {
+    isAuthenticated, 
+    login, 
+    signUp, 
+    logout, 
+    updateUser, 
+    authError, 
+    user, 
+    familyMembers, 
+    getFamilyMembers, 
+    addFamilyMember, 
+    deleteFamilyMember,
+    petList
+  }
+
   return (
     
-    <AuthContext.Provider value={{ isAuthenticated, login, signUp, logout, updateUser, authError, user }}>
+    <AuthContext.Provider value={values}>
       {children}
     </AuthContext.Provider>
   );
