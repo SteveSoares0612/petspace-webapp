@@ -7,14 +7,14 @@
   }
   
   .nav-link.active {
-    color: #f43f5e;
+    color: #DD595D;
     font-weight: bold;
   }
   
   .navbar-brand span {
     font-size: 20px;
     font-weight: bold;
-    color: #f43f5e;
+    color: #DD595D;
   }
   
   .logo-img {
@@ -31,13 +31,13 @@
   }
   
   .btn-primary {
-    background-color: #f43f5e;
-    border-color: #f43f5e;
+    background-color: #DD595D;
+    border-color: #DD595D;
   }
   
   .btn-outline-secondary {
     border: none;
-    color: #f43f5e;
+    color: #DD595D;
   }
 
   

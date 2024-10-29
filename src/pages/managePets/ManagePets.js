@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import './ManagePets.css'; // Custom CSS for styling
+import './ManagePets.css'; 
+import shareIcon from '../../assets/images/shareIcon.png'; 
+
 
 const ManagePets = () => {
   // Inline JSON data for pets
@@ -68,10 +70,15 @@ const ManagePets = () => {
   return (
     <div className="manage-pets">
       <Container>
-        <h2 className="manage-pets-title">Manage Pets</h2>
-        <div className="add-pet-button">
-          <Button variant="danger" className="rounded-circle">+</Button>
-        </div>
+        <Row className="d-flex justify-content-between align-items-center">
+          <Col className="d-flex align-items-center">
+            <h2>Manage Pets</h2>
+          </Col>
+          <Col className="d-flex justify-content-end align-items-center">
+            <Button variant="primary" className="ms-auto">Add Pet</Button>
+          </Col>
+        </Row>
+
 
         {/* Dogs Section */}
         <h4 className="pet-section-title">Dogs</h4>
@@ -88,6 +95,7 @@ const ManagePets = () => {
                           src={pet.image}
                           alt={pet.name}
                           className="rounded-circle pet-image"
+                          style={{ width: "5rem", }}
                         />
                       </div>
                       <div className="pet-text-col ms-3">
@@ -95,7 +103,7 @@ const ManagePets = () => {
                         <p className="pet-info">{`${pet.type}, ${pet.age} years`}</p>
                         <p className="pet-info">{pet.breed}</p>
                         <div className="pet-actions">
-                          <a href='' className="edit-btn">
+                          <a href='' className="edit-btn rounded fs-6 fw-normal">
                             Edit
                           </a>
                           <a href='' className="view-btn">
@@ -103,8 +111,8 @@ const ManagePets = () => {
                           </a>
                         </div>
                       </div>
-                      <Button variant="outline-danger" className="share-btn">
-                      <i class="bi bi-share-fill"></i>
+                      <Button variant="danger" className="share-btn">
+                        <img src={shareIcon} alt="My Profile" className="me-2" width={22} />
                       </Button>
                     </div>
                   </Card.Body>
@@ -128,6 +136,7 @@ const ManagePets = () => {
                           src={pet.image}
                           alt={pet.name}
                           className="rounded-circle pet-image"
+                          style={{ width: "5rem", }}
                         />
                       </div>
                       <div className="pet-text-col ms-3">
@@ -135,7 +144,7 @@ const ManagePets = () => {
                         <p className="pet-info">{`${pet.type}, ${pet.age} years`}</p>
                         <p className="pet-info">{pet.breed}</p>
                         <div className="pet-actions">
-                          <a href=''  className="edit-btn">
+                          <a href=''  className="edit-btn rounded">
                             Edit
                           </a>
                           <a href='' className="view-btn">
@@ -144,7 +153,7 @@ const ManagePets = () => {
                         </div>
                       </div>
                       <Button variant="outline-danger" className="share-btn">
-                      <i class="bi bi-share-fill"></i>
+                        <i class="bi bi-share-fill"></i>
                       </Button>
                     </div>
                   </Card.Body>

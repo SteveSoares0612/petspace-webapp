@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+// import 'bootstrap-icons/font/bootstrap-icons.css';
 import './Events.css';
 
 const Events = () => {
@@ -91,11 +91,11 @@ const Events = () => {
       <h5>Events &gt; Browse</h5>
       <Row>
         {events.map((event, index) => (
-          <Col key={index} md={3} className="mb-4">  {/* Change md={4} to md={3} */}
+          <Col key={index} md={3} className="mb-4"> 
             <Card className="event-card">
               <Card.Img className='event-image'
                 variant="top"
-                src={event.imageUrl}  // Use the event's image URL here
+                src={event.imageUrl}  
                 alt={event.title}
               />
               <Card.Body>

@@ -6,6 +6,7 @@ import logo from '../assets/images/logo.png';
 import { useAuth } from '../context/AuthContext';
 import {FaSignOutAlt, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import ProfileIcon from '../assets/images/myprofileicon.png'; 
+import editPetsIcon from '../assets/images/editpets.png'; 
 import FamilyIcon from '../assets/images/famiylIcon.png'; 
 import LogoutIcon from '../assets/images/logout.png'; 
 
@@ -39,8 +40,6 @@ function AppNavbar() {
           <Nav.Link as={Link} to="/home">Home</Nav.Link>
           <Nav.Link as={Link} to="/events">Events</Nav.Link>
           <Nav.Link as={Link} to="/health">My Health</Nav.Link>
-            <Nav.Link as={Link} to="/events">Events</Nav.Link>
-            <Nav.Link as={Link} to="/managepets">Manage Pets</Nav.Link>
           <Nav.Link as={Link} to="/shop">Shop</Nav.Link>
         </Nav>
 
@@ -58,6 +57,10 @@ function AppNavbar() {
               <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/family">
                 <img src={FamilyIcon} alt="My Family" className="me-2" width={16} height={16} /> My Family
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/managepets">
+                <img src={editPetsIcon} alt="Manage Pets" className="me-2" width={16} height={16} /> Manage Pets
               </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item onClick={handleLogout} className="text-danger">

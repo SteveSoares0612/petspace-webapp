@@ -9,7 +9,7 @@ import Home from './pages/Home';
 import Profile from './pages/profile/Profile';
 import Health from './pages/Health';
 import Events from './pages/Events/Events';
-import ManagePets from './pages/ManagePets';
+import ManagePets from './pages/managePets/ManagePets';
 import SignIn from './pages/signin/Signin';
 import SignUp from './pages/SignUp'; 
 import { useAuth } from './context/AuthContext'; // Use useAuth
@@ -28,6 +28,7 @@ const AppRoutes = () => {
             <Route path="/home" element={isAuthenticated ? <Home /> : <SignIn />} />
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
             <Route path="/profile" element={isAuthenticated ? <Profile /> : <SignIn />} />
+            <Route path="/family" element={isAuthenticated ? <Family /> : <SignIn />} />
             <Route path="/health" element={isAuthenticated ? <Health /> : <SignIn />} />
             <Route path="/signin" element={<SignIn />} /> 
             <Route path="/signup" element={<SignUp />} />
@@ -43,13 +44,17 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppNavbar />
-        <AppRoutes />
-        <Footer />
-
+        <div className="app-container">
+          <AppNavbar />
+          <main className="flex-grow-1">
+            <AppRoutes />
+          </main>
+          <Footer />
+        </div>
       </Router>
     </AuthProvider>
   );
 }
+
 
 export default App;
