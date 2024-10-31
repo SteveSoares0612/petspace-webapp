@@ -319,7 +319,7 @@ export const AuthProvider = ({ children }) => {
         ?.split('=')[1];
   
       console.log("TOKEN: " + token);
-      const response = await axios.post(`${BASE_URL}/web/pet/pet-list`, {
+      const response = await axios.get(`${BASE_URL}/web/pet/pet-list`, {
         headers: {
           'Content-Type': 'application/json',
           'X-XSRF-TOKEN': decodeURIComponent(token),
@@ -357,11 +357,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, [isAuthenticated]);
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //       getPetList();
-  //   }
-  // }, [isAuthenticated]);
+  useEffect(() => {
+    if (isAuthenticated) {
+        getPetList();
+    }
+  }, [isAuthenticated]);
 
 
   const values = {
