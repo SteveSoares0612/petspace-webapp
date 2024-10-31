@@ -1,12 +1,12 @@
-import React, { useState,useEffect } from 'react';
-import { Container, Row, Col, Button, Form, Image } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Row, Col, Button, Form, Image, Overlay, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { FiEdit } from 'react-icons/fi'; // Import the edit icon
 
 
 
 function Profile() {
-  const { isAuthenticated, user, updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // State for form fields
   const [firstName, setFirstName] = useState(user.first_name || '');
@@ -18,12 +18,15 @@ function Profile() {
   // const [province, setProvince] = useState('ON'); 
   // const [petsOwned, setPetsOwned] = useState('3');
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State for loading
+
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
   };
 
   const handleSave = async () => {
+    setIsLoading(true);
     try {
       await updateUser({
         first_name: firstName,
@@ -36,19 +39,16 @@ function Profile() {
         // pets_owned: petsOwned,
       });
       alert("Profile updated successfully!");
-      window.location.reload(); // Refresh the page after save
+      setIsEditing(false);
     } catch (error) {
       alert("Failed to update profile");
+    } finally {
+      setIsLoading(false); 
     }
   };
 
   return (
-    <Container className="p-4 mt-3 ms-0">
-            <Row>
-                <Col className="d-flex justify-content-between align-items-center">
-                    <h2>My Profile</h2>
-                </Col>
-            </Row>
+    <Container className="p-4">
       {/* Profile Info Section */}
       <Row>
         <Col md={2} className="text-center me-5 mt-4">
@@ -185,7 +185,7 @@ function Profile() {
                 </Col>
               </Row>
               <Row>
-              <Button variant="danger" className="mt-3" onClick={handleSave} disabled={!isEditing} >Save</Button>
+              <Button variant="danger" className="mt-3" onClick={handleSave} disabled={!isEditing} > {isLoading ? <Spinner></Spinner> : "Save"}</Button>
               </Row>
               {/* <Button variant="outline-danger" className="me-2 mt-3">Reset Password</Button> */}
              

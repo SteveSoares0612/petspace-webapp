@@ -120,7 +120,8 @@ const LandingPage = () => {
             <Col md={6}>
                 <h2 className='fw-bold h1-size text-light'>Download Now to get started</h2>
                 <p className='text-light'>Receive automated reminders and let AI track your pet’s history for smarter care management.</p>
-                
+                <img src={store} className="img-fluid" style={{ maxWidth: '70%' }} alt="Google Play Store" />
+
             </Col>    
         </Row>
       </section>
