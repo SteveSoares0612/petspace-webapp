@@ -244,7 +244,8 @@ export const AuthProvider = ({ children }) => {
       });
   
       if (response.status === 200) {
-        setFamilyMembers(response.data.data); // Extracting the data array directly
+        setFamilyMembers(response.data.list); // Extracting the data array directly
+        
       } else {
         throw new Error('Failed to fetch family members');
       }
@@ -311,6 +312,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const addPet = async (name, breed, type) => {
+    try {
+      const token = getCsrfToken();
+      const response = await axios.post(`${BASE_URL}/web/pet/create`, 
+        { name, breed, type }, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+  
+      if (response.status === 201) {
+        console.log("Pet added successfully:", response.data);
+        await getPetList(); // Fetch updated pet list after successful addition
+      } else {
+        throw new Error('Failed to add pet');
+      }
+    } catch (error) {
+      console.error('Error adding pet:', error);
+      throw error;
+    }
+  };
+  
+
   const getPetList = async () => {
     try {
       const token = document.cookie
@@ -328,7 +356,8 @@ export const AuthProvider = ({ children }) => {
       });
   
       if (response.status === 200) {
-        setPetList(response.data.data); // Extracting the data array directly
+        setPetList(response.data); // Extracting the data array directly
+        console.log(petList)
       } else {
         throw new Error('Failed to fetch list of pets');
       }
@@ -354,15 +383,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated) {
         getFamilyMembers();
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
         getPetList();
     }
   }, [isAuthenticated]);
-
 
   const values = {
     isAuthenticated, 
@@ -376,6 +399,8 @@ export const AuthProvider = ({ children }) => {
     getFamilyMembers, 
     addFamilyMember, 
     deleteFamilyMember,
+    addPet,
+    getPetList,
     petList
   }
 
