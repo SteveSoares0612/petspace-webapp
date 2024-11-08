@@ -1,6 +1,13 @@
 .custom {
-    background-color: #F8DEDF;
-    border-color: #DE595E;
-    border-radius: 8px solid;
-    color: #DE595E;
+  background-color: #f8dedf;
+  border-color: #de595e;
+  border-radius: 8px solid;
+  color: #de595e;
+}
+
+.view-btn {
+  margin-right: 10px;
+  color: #dd595d;
+  font-weight: bold;
+  text-decoration: none;
 }

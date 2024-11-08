@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Form, Image, Overlay, Spinner } from 'react-bootstrap';
-import { useAuth } from '../../context/AuthContext';
-import { FiEdit } from 'react-icons/fi'; // Import the edit icon
-
-
+import React, { useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Image,
+  Overlay,
+  Spinner,
+} from "react-bootstrap";
+import { useAuth } from "../../context/AuthContext";
+import { FiEdit } from "react-icons/fi"; // Import the edit icon
 
 function Profile() {
   const { user, updateUser } = useAuth();
 
   // State for form fields
-  const [firstName, setFirstName] = useState(user.first_name || '');
-  const [lastName, setLastName] = useState(user.last_name || '');
-  const [gender, setGender] = useState(user.gender || '');
-  const [dob, setDob] = useState(user.dob || '');
-  // const [phone, setPhone] = useState(user.phone || '');
-  // const [address, setAddress] = useState('887 Northlake Place, Waterloo'); 
-  // const [province, setProvince] = useState('ON'); 
+  const [firstName, setFirstName] = useState(user.first_name || "");
+  const [lastName, setLastName] = useState(user.last_name || "");
+  const [gender, setGender] = useState(user.gender || "");
+  const [dob, setDob] = useState(user.dob || "");
+  const [phone, setPhone] = useState(user.phone || "");
+  // const [address, setAddress] = useState('887 Northlake Place, Waterloo');
+  // const [province, setProvince] = useState('ON');
   // const [petsOwned, setPetsOwned] = useState('3');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // State for loading
-
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -31,19 +37,23 @@ function Profile() {
       await updateUser({
         first_name: firstName,
         last_name: lastName,
-        gender,
-        dob,
-        // phone,
-        // address,
-        // province,
-        // pets_owned: petsOwned,
+        role: "null",
+        email: "null",
+        phone: phone,
+        pets_count: user.pets_count,
+        is_form_filled: "0",
+        address_street_name: "null",
+        address_city: "Waterloo",
+        address_province: "null",
+        address_postal_code: "null",
+        address_country: "null",
       });
       alert("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       alert("Failed to update profile");
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
@@ -52,21 +62,40 @@ function Profile() {
       {/* Profile Info Section */}
       <Row>
         <Col md={2} className="text-center me-5 mt-4">
-          <Image src="https://img.freepik.com/free-photo/close-up-young-person-barbeque_23-2149271990.jpg" roundedCircle width={210} height={190} />
+          <Image
+            src="https://img.freepik.com/free-photo/close-up-young-person-barbeque_23-2149271990.jpg"
+            roundedCircle
+            width={210}
+            height={190}
+          />
         </Col>
         <Col md={8} className="text-start mt-4">
-          <h2>{user.first_name} {user.last_name}</h2>
-          <p>Female<br />{user.email}<br />{'user.address'}<br />12 Pet Events Attended</p>
-          <Button className="me-2 custom">4 Pets</Button>
-          <Button variant="danger" className="me-2">Add More+</Button>
-          <Button variant="secondary">Manage Pets</Button>
+          <h2>
+            {user.first_name} {user.last_name}
+          </h2>
+          <p>
+            {user.gender}
+            <br />
+            {user.email}
+            <br />
+            {"user.address"}
+            <br />
+            12 Pet Events Attended
+          </p>
+          <a href="#" className="view-btn">
+            {`${user.pets_count} Pets`}
+          </a>
+          
+          <Button variant="secondary" href="/managepets">Manage Pets</Button>
         </Col>
         <Row>
           <Col md={12}>
-            <h3 className="mt-5">Edit Profile  
+            <h3 className="mt-5">
+              Edit Profile
               <Button variant="link" onClick={handleEdit} className="mb-2">
                 <FiEdit size={20} />
-              </Button></h3>
+              </Button>
+            </h3>
             <Form className="mt-3">
               <Row>
                 <Col md={6}>
@@ -102,7 +131,12 @@ function Profile() {
                   <h6 className="text-muted fw-bold">Contact Information</h6>
                   <Form.Group>
                     <Form.Label className="mt-2">Email</Form.Label>
-                    <Form.Control type="email" placeholder={user.email} value={user.email} disabled={!isEditing} />
+                    <Form.Control
+                      type="email"
+                      placeholder={user.email}
+                      value={user.email}
+                      disabled={true}
+                    />
                   </Form.Group>
                 </Col>
               </Row>
@@ -112,8 +146,8 @@ function Profile() {
                     <Form.Label className="mt-2">Gender</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Enter Gender"
-                      value={gender}
+                      placeholder={user.gender ? user.gender : "Enter Gender"}
+                      value={user.gender}
                       onChange={(e) => setGender(e.target.value)}
                       disabled={!isEditing}
                     />
@@ -176,19 +210,29 @@ function Profile() {
                     <Form.Label className="mt-2">Phone Number</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Enter phone number"
-                      // value={phone}
-                      // onChange={(e) => setPhone(e.target.value)}
+                      placeholder={
+                        user.phone !== "null"
+                          ? user.phone
+                          : "Enter Phone Number"
+                      }
+                      onChange={(e) => setPhone(e.target.value)}
                       disabled={!isEditing}
                     />
                   </Form.Group>
                 </Col>
               </Row>
               <Row>
-              <Button variant="danger" className="mt-3" onClick={handleSave} disabled={!isEditing} > {isLoading ? <Spinner></Spinner> : "Save"}</Button>
+                <Button
+                  variant="danger"
+                  className="mt-3"
+                  onClick={handleSave}
+                  disabled={!isEditing}
+                >
+                  {" "}
+                  {isLoading ? <Spinner></Spinner> : "Save"}
+                </Button>
               </Row>
               {/* <Button variant="outline-danger" className="me-2 mt-3">Reset Password</Button> */}
-             
             </Form>
           </Col>
         </Row>
