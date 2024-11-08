@@ -111,9 +111,7 @@ const Events = () => {
                     Attend
                   </Button>
                   <span className="text-success">{event.price}</span>
-                  <Button variant="outline-secondary" size="sm">
-                    <i className="bi bi-bookmark"></i>
-                  </Button>
+                
                 </div>
               </Card.Body>
             </Card>

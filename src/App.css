@@ -45,21 +45,37 @@
 }
 
 html, body {
-  height: 100%; /* Ensure the body takes the full height of the viewport */
-  margin: 0; /* Remove default margin */
+  height: 100%; 
+  margin: 0; 
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensure it takes at least the full height of the viewport */
+  min-height: 100vh; /* Ensures the app takes at least the full height of the viewport */
 }
 
-.flex-grow-1 {
-  flex-grow: 1; /* This allows the main section to take the available space */
+main {
+  flex-grow: 1; /* Allows the main content to grow and take available space */
 }
 
 footer {
-  background-color: #f8f9fa; /* Adjust as needed */
-  padding: 20px; /* Adjust padding as needed */
+  /* Optional: add styles to your footer for better visibility */
+  background-color: #f8f9fa; /* Adjust based on your design */
 }
+
+.flex-grow-1 {
+  flex-grow: 1; 
+}
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex: 1; 
+}
+
