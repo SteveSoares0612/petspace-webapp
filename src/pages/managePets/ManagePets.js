@@ -8,6 +8,8 @@ import {
   Form,
   Modal,
 } from "react-bootstrap";
+import { Link } from "react-router-dom";
+
 import "./ManagePets.css";
 import deleteIcon from "../../assets/images/delete.png";
 import { useAuth } from "../../context/AuthContext";
@@ -22,22 +24,20 @@ const ManagePets = () => {
   const [newPet, setNewPet] = useState({
     name: "",
     breed: "",
-    type: "Dog", // default to Dog
-    dob: "", // date of birth
-    color: "", // color
-    gender: "", // gender
+    type: "Dog", 
+    dob: "", 
+    color: "", 
+    gender: "", 
   });
 
+  // Update `pets` state whenever `petList` changes
   useEffect(() => {
-    // Update pets state whenever petList changes
     if (petList && petList.pets_owned) {
       setPets(petList.pets_owned);
     }
   }, [petList]);
 
-  const handleAddPetClick = () => {
-    setShowAddPetForm(true);
-  };
+  const handleAddPetClick = () => setShowAddPetForm(true);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,7 +58,6 @@ const ManagePets = () => {
           newPet.color,
           newPet.gender
         );
-        // Reset newPet state
         setNewPet({
           name: "",
           breed: "",
@@ -68,6 +67,7 @@ const ManagePets = () => {
           gender: "",
         });
         setShowAddPetForm(false);
+        await getPetList(); // Refresh pet list after adding
       } catch (error) {
         console.error("Failed to save pet:", error);
       }
@@ -76,13 +76,10 @@ const ManagePets = () => {
     }
   };
 
-  const handleCancel = () => {
-    setShowAddPetForm(false);
-  };
+  const handleCancel = () => setShowAddPetForm(false);
 
   const handleDeleteMember = (id) => {
     setPetToDelete(id);
-    console.log(id);
     setShowModal(true);
   };
 
@@ -92,7 +89,7 @@ const ManagePets = () => {
         await deletePet(petToDelete);
         setShowModal(false);
         setPetToDelete(null);
-        await getPetList(); // Refresh the pet list
+        await getPetList(); // Refresh pet list after deletion
       } catch (error) {
         alert("Failed to delete pet.");
       }
@@ -100,14 +97,13 @@ const ManagePets = () => {
   };
 
   // Helper function to get display text for pet attributes
-  const getDisplayText = (value, defaultText) => {
-    return value ? value : defaultText;
-  };
+  const getDisplayText = (value, defaultText) => (value ? value : defaultText);
 
   // Determine if there are both dog and cat types in pets
-  const hasDogs = pets.some((pet) => pet.animal_type === "Dog");
-  const hasCats = pets.some((pet) => pet.animal_type === "Cat");
+  const hasDogs = pets.some((pet) => pet.animal_type === "dog");
+  const hasCats = pets.some((pet) => pet.animal_type === "cat");
 
+console.log(pets)
   return (
     <div className="manage-pets">
       <Container>
@@ -116,11 +112,7 @@ const ManagePets = () => {
             <h2>Manage Pets</h2>
           </Col>
           <Col className="d-flex justify-content-end align-items-center">
-            <Button
-              variant="primary"
-              onClick={handleAddPetClick}
-              className="ms-auto"
-            >
+            <Button variant="primary" onClick={handleAddPetClick} className="ms-auto">
               Add Pet
             </Button>
           </Col>
@@ -200,18 +192,10 @@ const ManagePets = () => {
                   </Form.Control>
                 </Form.Group>
 
-                <Button
-                  variant="light"
-                  onClick={handleCancel}
-                  className="mt-3 mb-3 me-3"
-                >
+                <Button variant="light" onClick={handleCancel} className="mt-3 mb-3 me-3">
                   Cancel
                 </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSavePet}
-                  className="mt-3 mb-3"
-                >
+                <Button variant="primary" onClick={handleSavePet} className="mt-3 mb-3">
                   Save Pet
                 </Button>
               </Form>
@@ -229,60 +213,30 @@ const ManagePets = () => {
                   <>
                     <h4 className="pet-section-title">Dogs</h4>
                     <Row>
-                      {pets
-                        .filter((pet) => pet.animal_type === "Dog")
-                        .map((pet) => (
-                          <Col md={4} key={pet.id}>
-                            <Card className="pet-card mb-4">
-                              <Card.Body>
-                                <div className="d-flex align-items-center">
-                                  <div className="pet-image-col">
-                                    <img
-                                      src={
-                                        "https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg?cs=srgb&dl=pexels-svetozar-milashevich-99573-1490908.jpg&fm=jpg" ||
-                                        deleteIcon
-                                      } // Fallback image if none exists
-                                      alt={pet.name}
-                                      className="rounded-circle pet-image"
-                                      style={{ height: "7rem" }}
-                                    />
-                                  </div>
-                                  <div className="pet-text-col ms-3">
-                                    <h5 className="pet-info fw-bold">
-                                      {getDisplayText(pet.name, "Unnamed")}
-                                    </h5>
-                                    <p className="pet-info">
-                                      {`${getDisplayText(
-                                        pet.breed,
-                                        "Unknown Breed"
-                                      )}, ${getDisplayText(
-                                        pet.dob,
-                                        "Unknown"
-                                      )} Years`}
-                                    </p>
-                                    <div className="pet-actions">
-                                      <a href="#" className="view-btn">
-                                        View
-                                      </a>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="danger"
-                                    className="share-btn"
-                                    onClick={() => handleDeleteMember(pet.id)}
-                                  >
-                                    <img
-                                      src={deleteIcon}
-                                      alt="Share"
-                                      className="me-2"
-                                      width={22}
-                                    />
-                                  </Button>
-                                </div>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                        ))}
+                      {pets?.filter((pet) => pet.animal_type === "dog").map((pet) => (
+                        <Col md={4} key={pet.id}>
+                          <Card className="pet-card mb-4">
+                            <Card.Body>
+                              <h5 className="pet-info fw-bold">
+                                {getDisplayText(pet.name, "Unnamed")}
+                              </h5>
+                              <p className="pet-info">
+                                {`${getDisplayText(pet.breed, "Unknown Breed")}, ${getDisplayText(
+                                  pet.dob,
+                                  "Unknown"
+                                )} Years`}
+                              </p>
+                              <Link to={`/viewpets/${pet.id}`} className="view-btn">View</Link>
+                              <Button
+                                variant="danger"
+                                onClick={() => handleDeleteMember(pet.id)}
+                              >
+                                <img src={deleteIcon} alt="Delete" width={22} />
+                              </Button>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      ))}
                     </Row>
                   </>
                 )}
@@ -291,60 +245,30 @@ const ManagePets = () => {
                   <>
                     <h4 className="pet-section-title">Cats</h4>
                     <Row>
-                      {pets
-                        .filter((pet) => pet.animal_type === "Cat")
-                        .map((pet) => (
-                          <Col md={4} key={pet.id}>
-                            <Card className="pet-card mb-4">
-                              <Card.Body>
-                                <div className="d-flex align-items-center">
-                                  <div className="pet-image-col">
-                                    <img
-                                      src={
-                                        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg" ||
-                                        deleteIcon
-                                      } // Fallback image if none exists
-                                      alt={pet.name}
-                                      className="rounded-circle pet-image"
-                                      style={{ height: "7rem" }}
-                                    />
-                                  </div>
-                                  <div className="pet-text-col ms-3">
-                                    <h5 className="pet-info fw-bold">
-                                      {getDisplayText(pet.name, "Unnamed")}
-                                    </h5>
-                                    <p className="pet-info">
-                                      {`${getDisplayText(
-                                        pet.breed,
-                                        "Unknown Breed"
-                                      )}, ${getDisplayText(
-                                        pet.dob,
-                                        "Unknown"
-                                      )} Years`}
-                                    </p>
-                                    <div className="pet-actions">
-                                      <a href="#" className="view-btn">
-                                        View
-                                      </a>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="danger"
-                                    className="share-btn"
-                                    onClick={() => handleDeleteMember(pet.id)}
-                                  >
-                                    <img
-                                      src={deleteIcon}
-                                      alt="Share"
-                                      className="me-2"
-                                      width={22}
-                                    />
-                                  </Button>
-                                </div>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                        ))}
+                      {pets.filter((pet) => pet.animal_type === "cat").map((pet) => (
+                        <Col md={4} key={pet.id}>
+                          <Card className="pet-card mb-4">
+                            <Card.Body>
+                              <h5 className="pet-info fw-bold">
+                                {getDisplayText(pet.name, "Unnamed")}
+                              </h5>
+                              <p className="pet-info">
+                                {`${getDisplayText(pet.breed, "Unknown Breed")}, ${getDisplayText(
+                                  pet.dob,
+                                  "Unknown"
+                                )} Years`}
+                              </p>
+                              <Link to={`/viewpets/${pet.id}`} className="view-btn">View</Link>
+                              <Button
+                                variant="danger"
+                                onClick={() => handleDeleteMember(pet.id)}
+                              >
+                                <img src={deleteIcon} alt="Delete" width={22} />
+                              </Button>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      ))}
                     </Row>
                   </>
                 )}
@@ -352,25 +276,22 @@ const ManagePets = () => {
             )}
           </>
         )}
-        {/* Confirmation Modal */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Are you sure you want to delete this pet? This action is
-            irreversible, and all associated data will be permanently lost.
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDeletePet}>
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </Container>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Pet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete this pet?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeletePet}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

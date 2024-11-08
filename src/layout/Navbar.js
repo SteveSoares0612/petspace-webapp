@@ -23,7 +23,7 @@ function AppNavbar() {
   };
 
   useEffect(() => {
-    console.log(user);
+    console.log(user.address);
   });
 
   return (
