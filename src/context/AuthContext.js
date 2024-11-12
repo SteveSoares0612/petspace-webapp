@@ -1,7 +1,7 @@
 // src/context/AuthContext.js
-import React, { createContext, useContext, useState } from 'react';
-import axios from 'axios';
-import { useEffect } from 'react';
+import React, { createContext, useContext, useState } from "react";
+import axios from "axios";
+import { useEffect } from "react";
 
 // Create AuthContext
 const AuthContext = createContext();
@@ -18,55 +18,58 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(""); // To store user details after login
   const [familyMembers, setFamilyMembers] = useState([]); //Get family members
   const [petList, setPetList] = useState([]); //Get List of pets
+  const [petDetails, setPetDetails] = useState(null); // State to store fetched pet details
 
-  
+
   const BASE_URL = "http://localhost:8000";
 
   // Function to get the XSRF token
   const getCsrfToken = async () => {
     try {
-      let response = await axios.get(BASE_URL + '/sanctum/csrf-cookie', {
+      let response = await axios.get(BASE_URL + "/sanctum/csrf-cookie", {
         withCredentials: true, // Required for cookies to be sent
       });
       if (response.status === 204) {
-        console.log('CSRF token fetched successfully');
+        console.log("CSRF token fetched successfully");
       } else {
-        throw new Error('Failed to fetch CSRF token');
+        throw new Error("Failed to fetch CSRF token");
       }
     } catch (error) {
-      console.error('Error fetching CSRF token:', error);
+      console.error("Error fetching CSRF token:", error);
     }
   };
-  
+
   const login = async (email, password) => {
     try {
       // Fetch the CSRF token
       await getCsrfToken();
-  
+
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-  
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
       if (!token) {
-        throw new Error('CSRF token not found in cookies');
+        throw new Error("CSRF token not found in cookies");
       }
-  
+
       // Send the login request using Axios
       const response = await axios.post(
-        BASE_URL + '/api/login',
+        BASE_URL + "/api/login",
         { email, password },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': decodeURIComponent(token),
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
           },
           withCredentials: true,
         }
       );
-  
+
       if (response.status === 200) {
+
         const data = response.data.data; // Access the 'data' object in the response
+        console.log(data)
         const userData = {
           id: data.id,
           first_name: data.first_name,
@@ -79,15 +82,19 @@ export const AuthProvider = ({ children }) => {
           is_form_filled: data.is_form_filled,
           created_at: data.created_at,
           updated_at: data.updated_at,
+          address: data.address,
+          pets_count: data.pets_count,
+          phone: data.phone,
+          profile_image: data.profile_image
         };
-  
-        localStorage.setItem('user', JSON.stringify(userData));
+
+        localStorage.setItem("user", JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
-        setAuthError(null); // Clear any existing error
-        return true; // Return true for successful login
+        setAuthError(null); 
+        return true; 
       } else {
-        throw new Error('Login failed: Invalid response status');
+        throw new Error("Login failed: Invalid response status");
       }
     } catch (error) {
       if (error.response) {
@@ -98,37 +105,36 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false); // Set authentication state to false
       return false; // Return false for failed login
     }
-  };  
+  };
 
   const signUp = async (first_name, last_name, email, password) => {
     const cookies = document.cookie.split("; ");
-      for (let cookie of cookies) {
-        const cookieName = cookie.split("=")[0];
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-      }
+    for (let cookie of cookies) {
+      const cookieName = cookie.split("=")[0];
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+    }
     try {
       // Step 1: Fetch the CSRF token.
       await getCsrfToken();
 
       // Extract the XSRF token from cookies
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
 
       if (!token) {
-        throw new Error('CSRF token not found in cookies');
+        throw new Error("CSRF token not found in cookies");
       }
 
       // Step 2: Send the login request using Axios
       const response = await axios.post(
-        BASE_URL + '/api/register',
+        BASE_URL + "/api/register",
         { first_name, last_name, email, password }, // Send credentials in request body
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': decodeURIComponent(token), // Set the XSRF token in the headers
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token), // Set the XSRF token in the headers
           },
           withCredentials: true, // Include cookies for authentication
         }
@@ -136,16 +142,15 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         const data = response.data;
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
         setUser(data.user);
         setIsAuthenticated(true);
         setAuthError(null); // Clear any existing error
         return true; // Return true for successful login
       } else {
-        throw new Error('Login failed: Invalid response status');
+        throw new Error("Login failed: Invalid response status");
       }
     } catch (error) {
-    
       if (error.response) {
         setAuthError(error.response.data.message || "Login failed");
       } else {
@@ -157,27 +162,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async (email) => {
-    localStorage.clear()
+    localStorage.clear();
     try {
       // Extract the XSRF token from cookies
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
 
       if (!token) {
-        throw new Error('CSRF token not found in cookies');
+        throw new Error("CSRF token not found in cookies");
       }
 
-      // Step 2: Send the login request using Axios
       const response = await axios.post(
-        BASE_URL + '/api/logout',
+        BASE_URL + "/api/logout",
         { email }, // Send credentials in request body
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': decodeURIComponent(token), // Set the XSRF token in the headers
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token), // Set the XSRF token in the headers
           },
           withCredentials: true, // Include cookies for authentication
         }
@@ -188,9 +191,9 @@ export const AuthProvider = ({ children }) => {
         const cookieName = cookie.split("=")[0];
         document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
       }
-  
+
       setIsAuthenticated(false); // Set authentication state to false
-      setAuthError(null); 
+      setAuthError(null);
     } catch (error) {
       setIsAuthenticated(false);
     }
@@ -199,149 +202,378 @@ export const AuthProvider = ({ children }) => {
   const updateUser = async (updatedUserData) => {
     try {
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
 
-      const response = await axios.put(
-        `${BASE_URL}/web/account/update/${user.id}`,
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/account/update/`,
         updatedUserData,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': decodeURIComponent(token),
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
           },
           withCredentials: true,
         }
       );
 
       if (response.status === 200) {
-        const updatedUser = response.data.data;
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser); // Update the user data in context
+        const updatedUser = response.data;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
       } else {
-        throw new Error('Failed to update profile');
+        throw new Error("Failed to update profile");
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
       throw error; // Throw error so it can be caught by the calling function
     }
   };
 
   const getFamilyMembers = async () => {
+    const isLoginPage = window.location.pathname === '/signin';
+
     try {
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
   
-      const response = await axios.get(`${BASE_URL}/web/account/member-list`, {
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+  
+      const response = await axios.get(`${BASE_URL}/web/account/member/member-list`, {
         headers: {
-          'Content-Type': 'application/json',
-          'X-XSRF-TOKEN': decodeURIComponent(token),
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
         },
         withCredentials: true,
       });
   
       if (response.status === 200) {
-        setFamilyMembers(response.data.data); // Extracting the data array directly
+        setFamilyMembers(response.data.list); // Extracting the data array directly
       } else {
-        throw new Error('Failed to fetch family members');
+        throw new Error("Failed to fetch family members");
       }
     } catch (error) {
-      console.error('Error fetching family members:', error);
-      throw error; // Throw error so it can be caught by the calling function
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching family members:", error);
+      }
+      throw error; 
     }
   };
   
   
 
   const addFamilyMember = async (email) => {
+    const isLoginPage = window.location.pathname === '/signin';
+
     try {
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-  
-      const response = await axios.post(`${BASE_URL}/web/account/member/add`, 
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/account/member/add`,
         { email }, // Data to be sent
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': decodeURIComponent(token),
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
           },
           withCredentials: true,
         }
       );
-  
-      if (response.status === 200) { 
-        setFamilyMembers(response.data); 
+
+      if (response.status === 200) {
+        setFamilyMembers(response.data);
       } else {
-        throw new Error('Failed to add family member');
+        throw new Error("Failed to add family member");
       }
     } catch (error) {
-      console.error('Error adding family member:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false); 
+        }
+      } else {
+        console.error("Error adding family members:", error);
+      }
       throw error; // Throw error so it can be caught by the calling function
     }
   };
 
   const deleteFamilyMember = async (id) => {
+    const isLoginPage = window.location.pathname === '/signin';
+
     try {
-        const token = document.cookie
-            .split('; ')
-            .find((row) => row.startsWith('XSRF-TOKEN='))
-            ?.split('=')[1];
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
 
-        const response = await axios.delete(`${BASE_URL}/web/account/member/delete/${id}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': decodeURIComponent(token),
-            },
-            withCredentials: true,
-        });
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
 
-        if (response.status === 200) { 
-            return true;
-        } else {
-            throw new Error('Failed to delete family member');
+      const response = await axios.delete(
+        `${BASE_URL}/web/account/member/delete/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
         }
+      );
+
+      if (response.status === 200) {
+        return true;
+      } else {
+        throw new Error("Failed to delete family member");
+      }
     } catch (error) {
-        console.error('Error deleting family member:', error);
-        throw error; 
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+       
+      } else {
+        console.error("Error deleting family members:", error);
+      }
+      throw error;
+    }
+  };
+
+  const addPet = async (name, breed, animal_type, dob, color, gender) => {
+    const isLoginPage = window.location.pathname === '/signin';
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/create`,
+        { name, breed, animal_type, dob, color, gender },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 201) {
+        console.log("Pet added successfully:", response.data);
+        const updatedUser = { ...user, pets_count: user.pets_count + 1 };
+        localStorage.setItem('user', JSON.stringify(updatedUser)); 
+        await getPetList();
+      } else {
+        throw new Error("Failed to add pet");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error adding pets:", error);
+      }
+      throw error;
     }
   };
 
   const getPetList = async () => {
+    const isLoginPage = window.location.pathname === '/signin';
+
     try {
       const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      console.log("TOKEN: " + token);
+      const response = await axios.get(`${BASE_URL}/web/pet/pet-list`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        setPetList(response.data); 
+        console.log("petList: " , response.data);
+      } 
+      else {
+        throw new Error("Failed to fetch list of pets");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pets");
+      }
+      throw error;
+    }
+  };
+
+  const deletePet = async (petid) => {
+    const isLoginPage = window.location.pathname === '/signin';
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.delete(
+        `${BASE_URL}/web/pet/delete/${petid}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        const updatedUser = { ...user, pets_count: user.pets_count - 1 };
+        localStorage.setItem('user', JSON.stringify(updatedUser)); 
+        return true;
+      } else {
+        throw new Error("Failed to delete pet");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+       
+      } else {
+        console.error("Error deleting pet:", error);
+      }
+      throw error;
+    }
+  };
+
+  const getPetDetails = async (petId) => {
+    const isLoginPage = window.location.pathname === '/signin';
+  
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
   
       console.log("TOKEN: " + token);
-      const response = await axios.post(`${BASE_URL}/web/pet/pet-list`, {
+      const response = await axios.get(`${BASE_URL}/web/pet/pet-detail/${petId}`, {
         headers: {
-          'Content-Type': 'application/json',
-          'X-XSRF-TOKEN': decodeURIComponent(token),
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
         },
         withCredentials: true,
       });
   
       if (response.status === 200) {
-        setPetList(response.data.data); // Extracting the data array directly
+        console.log("Pet Details: ", response.data);
+        setPetDetails(response.data); 
       } else {
-        throw new Error('Failed to fetch list of pets');
+        throw new Error("Failed to fetch pet details");
       }
     } catch (error) {
-      console.error('Error fetching list of pets:', error);
-      throw error; 
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pet details");
+      }
+      throw error;
     }
   };
   
-  
+  const uploadUserImage = async (file) => {
+    try {
+      // Retrieve the CSRF token from cookies
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);  // Append the image file
+      formData.append('filename', file.name);  // Append the image filename
+
+      // Send the image to the server
+      const response = await axios.post(
+        'http://localhost:8000/web/account/change-avatar', 
+        formData, 
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-XSRF-TOKEN': decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        console.log('Image uploaded successfully:', response.data);
+        return response.data; // Return the response if needed
+      } else {
+        throw new Error("Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
+
+
   useEffect(() => {
-    setAuthError(null)
-    const storedUser = localStorage.getItem('user');
+    setAuthError(null);
+    const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
       setIsAuthenticated(true); // User is considered authenticated
@@ -349,40 +581,35 @@ export const AuthProvider = ({ children }) => {
         setUser(JSON.parse(storedUser)); // Set user data from localStorage
       }
     }
-  },[]);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
-        getFamilyMembers();
+      getFamilyMembers();
+      getPetList();
     }
   }, [isAuthenticated]);
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //       getPetList();
-  //   }
-  // }, [isAuthenticated]);
-
-
   const values = {
-    isAuthenticated, 
-    login, 
-    signUp, 
-    logout, 
-    updateUser, 
-    authError, 
-    user, 
-    familyMembers, 
-    getFamilyMembers, 
-    addFamilyMember, 
+    isAuthenticated,
+    login,
+    signUp,
+    logout,
+    updateUser,
+    authError,
+    user,
+    familyMembers,
+    getFamilyMembers,
+    addFamilyMember,
     deleteFamilyMember,
-    petList
-  }
+    addPet,
+    getPetList,
+    petList,
+    deletePet,
+    getPetDetails,
+    petDetails,
+    uploadUserImage
+  };
 
-  return (
-    
-    <AuthContext.Provider value={values}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
 };

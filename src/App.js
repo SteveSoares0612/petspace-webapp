@@ -15,6 +15,7 @@ import SignUp from './pages/SignUp';
 import { useAuth } from './context/AuthContext'; // Use useAuth
 import LandingPage from './pages/landingPage/LandingPage';
 import Family from './pages/familyPage/Family'
+import ViewPets from './pages/managePets/ViewPets';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth(); // Get authentication state from context
@@ -33,6 +34,7 @@ const AppRoutes = () => {
             <Route path="/signin" element={<SignIn />} /> 
             <Route path="/signup" element={<SignUp />} />
             <Route path="/managepets" element={<ManagePets />} />
+            <Route path="/viewpets/:id" element={<ViewPets />} />
           </Routes>
         </Col>
       </Row>
@@ -55,6 +57,7 @@ function App() {
     </AuthProvider>
   );
 }
+
 
 
 export default App;
