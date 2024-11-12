@@ -84,7 +84,8 @@ export const AuthProvider = ({ children }) => {
           updated_at: data.updated_at,
           address: data.address,
           pets_count: data.pets_count,
-          phone: data.phone
+          phone: data.phone,
+          profile_image: data.profile_image
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
@@ -528,6 +529,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
+  const uploadUserImage = async (file) => {
+    try {
+      // Retrieve the CSRF token from cookies
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);  // Append the image file
+      formData.append('filename', file.name);  // Append the image filename
+
+      // Send the image to the server
+      const response = await axios.post(
+        'http://localhost:8000/web/account/change-avatar', 
+        formData, 
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-XSRF-TOKEN': decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        console.log('Image uploaded successfully:', response.data);
+        return response.data; // Return the response if needed
+      } else {
+        throw new Error("Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
 
 
   useEffect(() => {
@@ -566,7 +607,8 @@ export const AuthProvider = ({ children }) => {
     petList,
     deletePet,
     getPetDetails,
-    petDetails
+    petDetails,
+    uploadUserImage
   };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;

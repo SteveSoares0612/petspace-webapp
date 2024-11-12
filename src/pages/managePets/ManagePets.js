@@ -8,8 +8,10 @@ import {
   Form,
   Modal,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
 
+import previewImage from "../../assets/images/previewImage.jpg";
+
+import { Link } from "react-router-dom";
 import "./ManagePets.css";
 import deleteIcon from "../../assets/images/delete.png";
 import { useAuth } from "../../context/AuthContext";
@@ -24,10 +26,10 @@ const ManagePets = () => {
   const [newPet, setNewPet] = useState({
     name: "",
     breed: "",
-    type: "Dog", 
-    dob: "", 
-    color: "", 
-    gender: "", 
+    type: "Dog",
+    dob: "",
+    color: "",
+    gender: "",
   });
 
   // Update `pets` state whenever `petList` changes
@@ -36,6 +38,20 @@ const ManagePets = () => {
       setPets(petList.pets_owned);
     }
   }, [petList]);
+
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        console.log(imagePreview)
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddPetClick = () => setShowAddPetForm(true);
 
@@ -103,7 +119,7 @@ const ManagePets = () => {
   const hasDogs = pets.some((pet) => pet.animal_type === "dog");
   const hasCats = pets.some((pet) => pet.animal_type === "cat");
 
-console.log(pets)
+  console.log(pets);
   return (
     <div className="manage-pets">
       <Container>
@@ -112,7 +128,11 @@ console.log(pets)
             <h2>Manage Pets</h2>
           </Col>
           <Col className="d-flex justify-content-end align-items-center">
-            <Button variant="primary" onClick={handleAddPetClick} className="ms-auto">
+            <Button
+              variant="primary"
+              onClick={handleAddPetClick}
+              className="ms-auto"
+            >
               Add Pet
             </Button>
           </Col>
@@ -122,6 +142,7 @@ console.log(pets)
           <Row className="mt-3">
             <Col md={6}>
               <Form>
+                {/* Pet Details Form */}
                 <Form.Group controlId="petName">
                   <Form.Label>Pet Name</Form.Label>
                   <Form.Control
@@ -192,13 +213,57 @@ console.log(pets)
                   </Form.Control>
                 </Form.Group>
 
-                <Button variant="light" onClick={handleCancel} className="mt-3 mb-3 me-3">
+                <Button
+                  variant="light"
+                  onClick={handleCancel}
+                  className="mt-3 mb-3 me-3"
+                >
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={handleSavePet} className="mt-3 mb-3">
+                <Button
+                  variant="primary"
+                  onClick={handleSavePet}
+                  className="mt-3 mb-3"
+                >
                   Save Pet
                 </Button>
               </Form>
+            </Col>
+
+            {/* Image Upload Section */}
+            <Col
+              md={6}
+              className="d-flex align-items-start justify-content-center">
+              <div className="image-upload-container text-center">
+                <div className="image-box position-relative">
+                  <img
+                    src={imagePreview || previewImage}
+                    alt="Pet Profile"
+                    className="img-fluid rounded"
+                    style={{
+                      width: "100%",
+                      maxHeight: "250px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Button
+                    variant="primary"
+                    className="position-absolute bottom-0 end-0 m-2"
+                    onClick={() =>
+                      document.getElementById("imageUpload").click()
+                    }
+                  >
+                    Upload Image
+                  </Button>
+                  <input
+                    type="file"
+                    id="imageUpload"
+                    style={{ display: "none" }}
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
             </Col>
           </Row>
         ) : (
@@ -213,30 +278,44 @@ console.log(pets)
                   <>
                     <h4 className="pet-section-title">Dogs</h4>
                     <Row>
-                      {pets?.filter((pet) => pet.animal_type === "dog").map((pet) => (
-                        <Col md={4} key={pet.id}>
-                          <Card className="pet-card mb-4">
-                            <Card.Body>
-                              <h5 className="pet-info fw-bold">
-                                {getDisplayText(pet.name, "Unnamed")}
-                              </h5>
-                              <p className="pet-info">
-                                {`${getDisplayText(pet.breed, "Unknown Breed")}, ${getDisplayText(
-                                  pet.dob,
-                                  "Unknown"
-                                )} Years`}
-                              </p>
-                              <Link to={`/viewpets/${pet.id}`} className="view-btn">View</Link>
-                              <Button
-                                variant="danger"
-                                onClick={() => handleDeleteMember(pet.id)}
-                              >
-                                <img src={deleteIcon} alt="Delete" width={22} />
-                              </Button>
-                            </Card.Body>
-                          </Card>
-                        </Col>
-                      ))}
+                      {pets
+                        ?.filter((pet) => pet.animal_type === "dog")
+                        .map((pet) => (
+                          <Col md={4} key={pet.id}>
+                            <Card className="pet-card mb-4">
+                              <Card.Body>
+                                <h5 className="pet-info fw-bold">
+                                  {getDisplayText(pet.name, "Unnamed")}
+                                </h5>
+                                <p className="pet-info">
+                                  {`${getDisplayText(
+                                    pet.breed,
+                                    "Unknown Breed"
+                                  )}, ${getDisplayText(
+                                    pet.dob,
+                                    "Unknown"
+                                  )} Years`}
+                                </p>
+                                <Link
+                                  to={`/viewpets/${pet.id}`}
+                                  className="view-btn"
+                                >
+                                  View
+                                </Link>
+                                <Button
+                                  variant="danger"
+                                  onClick={() => handleDeleteMember(pet.id)}
+                                >
+                                  <img
+                                    src={deleteIcon}
+                                    alt="Delete"
+                                    width={22}
+                                  />
+                                </Button>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))}
                     </Row>
                   </>
                 )}
@@ -245,30 +324,44 @@ console.log(pets)
                   <>
                     <h4 className="pet-section-title">Cats</h4>
                     <Row>
-                      {pets.filter((pet) => pet.animal_type === "cat").map((pet) => (
-                        <Col md={4} key={pet.id}>
-                          <Card className="pet-card mb-4">
-                            <Card.Body>
-                              <h5 className="pet-info fw-bold">
-                                {getDisplayText(pet.name, "Unnamed")}
-                              </h5>
-                              <p className="pet-info">
-                                {`${getDisplayText(pet.breed, "Unknown Breed")}, ${getDisplayText(
-                                  pet.dob,
-                                  "Unknown"
-                                )} Years`}
-                              </p>
-                              <Link to={`/viewpets/${pet.id}`} className="view-btn">View</Link>
-                              <Button
-                                variant="danger"
-                                onClick={() => handleDeleteMember(pet.id)}
-                              >
-                                <img src={deleteIcon} alt="Delete" width={22} />
-                              </Button>
-                            </Card.Body>
-                          </Card>
-                        </Col>
-                      ))}
+                      {pets
+                        .filter((pet) => pet.animal_type === "cat")
+                        .map((pet) => (
+                          <Col md={4} key={pet.id}>
+                            <Card className="pet-card mb-4">
+                              <Card.Body>
+                                <h5 className="pet-info fw-bold">
+                                  {getDisplayText(pet.name, "Unnamed")}
+                                </h5>
+                                <p className="pet-info">
+                                  {`${getDisplayText(
+                                    pet.breed,
+                                    "Unknown Breed"
+                                  )}, ${getDisplayText(
+                                    pet.dob,
+                                    "Unknown"
+                                  )} Years`}
+                                </p>
+                                <Link
+                                  to={`/viewpets/${pet.id}`}
+                                  className="view-btn"
+                                >
+                                  View
+                                </Link>
+                                <Button
+                                  variant="danger"
+                                  onClick={() => handleDeleteMember(pet.id)}
+                                >
+                                  <img
+                                    src={deleteIcon}
+                                    alt="Delete"
+                                    width={22}
+                                  />
+                                </Button>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))}
                     </Row>
                   </>
                 )}
