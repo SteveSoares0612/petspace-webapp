@@ -10,9 +10,10 @@ import {
 } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FiEdit } from "react-icons/fi";
+import previewImage from "../../assets/images/previewImage.jpg";
 
 function Profile() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, uploadUserImage } = useAuth();
 
   // State for form fields
   const [firstName, setFirstName] = useState(user.first_name || "");
@@ -23,9 +24,7 @@ function Profile() {
   const [addressStreetName, setAddressStreetName] = useState(
     user.address.street_name || "null"
   );
-  const [addressCity, setAddressCity] = useState(
-    user.address.city || "null"
-  );
+  const [addressCity, setAddressCity] = useState(user.address.city || "null");
   const [addressProvince, setAddressProvince] = useState(
     user.address.province || "null"
   );
@@ -54,6 +53,25 @@ function Profile() {
     { value: "NU", label: "Nunavut" },
     { value: "YT", label: "Yukon" },
   ];
+
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+// Image upload function with API call
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result); // Preview the image
+    };
+    reader.readAsDataURL(file);
+    setSelectedFile(file); // Set the selected file for the upload
+    uploadUserImage(file); // Call the upload function
+  }
+};
+
+
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -86,13 +104,35 @@ function Profile() {
     <Container className="p-4">
       {/* Profile Info Section */}
       <Row>
-        <Col md={2} className="text-center me-5 mt-4">
-          <Image
-            src="https://img.freepik.com/free-photo/close-up-young-person-barbeque_23-2149271990.jpg"
-            roundedCircle
-            width={210}
-            height={190}
-          />
+        <Col md={2} className="text-center mt-4">
+          <div className="image-upload-container text-center">
+            <div className="image-box position-relative">
+              <img
+                src={imagePreview || previewImage}
+                alt="Pet Profile"
+                className="img-fluid rounded"
+                style={{
+                  width: "100%",
+                  maxHeight: "250px",
+                  objectFit: "cover",
+                }}
+              />
+              <Button
+                variant="primary"
+                className="position-absolute bottom-0 end-0 m-2"
+                onClick={() => document.getElementById("imageUpload").click()}
+              >
+                Upload Image
+              </Button>
+              <input
+                type="file"
+                id="imageUpload"
+                style={{ display: "none" }}
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
         </Col>
         <Col md={8} className="text-start mt-4">
           <h2>
@@ -102,7 +142,8 @@ function Profile() {
             {user.email}
             <br />
             {/* Display Address Info Properly */}
-            {user.address && `${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}
+            {user.address &&
+              `${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}
           </p>
           <a href="#" className="view-btn">{`${petsOwned} Pets`}</a>
           <Button variant="secondary" href="/managepets">
@@ -155,11 +196,9 @@ function Profile() {
                   <Form.Control
                     type="text"
                     placeholder={
-                      phone === "null"
-                        ? "Enter Phone Number"
-                        : phone
+                      phone === "null" ? "Enter Phone Number" : phone
                     }
-                    value={phone  === "null" ? "" : phone}
+                    value={phone === "null" ? "" : phone}
                     onChange={(e) => setPhone(e.target.value)}
                     disabled={!isEditing}
                   />
@@ -182,7 +221,9 @@ function Profile() {
                         ? "Enter Street Name"
                         : addressStreetName
                     }
-                    value={addressStreetName === "null" ? "" : addressStreetName}
+                    value={
+                      addressStreetName === "null" ? "" : addressStreetName
+                    }
                     onChange={(e) => setAddressStreetName(e.target.value)}
                     disabled={!isEditing}
                   />
@@ -194,9 +235,7 @@ function Profile() {
                   <Form.Control
                     type="text"
                     placeholder={
-                      addressCity === "null"
-                        ? "Enter City"
-                        : addressCity
+                      addressCity === "null" ? "Enter City" : addressCity
                     }
                     value={addressCity === "null" ? "" : addressCity}
                     onChange={(e) => setAddressCity(e.target.value)}

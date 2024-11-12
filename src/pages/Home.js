@@ -52,6 +52,8 @@ function Home() {
     setEvents(eventData);
   }, []);
 
+  
+
   return (
     <>
       <Container className="mt-3 ms-0">
