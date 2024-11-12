@@ -68,10 +68,10 @@ function Home() {
           </Col>
         </Row>
       </Container>
-      <Container className="mt-3 ms-0 mb-4">
+      <Container className="mt-3 ms-0 mb-4 d-flex justify-content-start">
         <Row>
           {pets.map((pet) => (
-            <Col key={pet.id} className="d-flex justify-content-start align-items-center">
+            <Col key={pet.id} className="">
               <Card className="me-3" style={{ width: "18rem", height: "18rem" }}>
                 <Card.Img
                   variant="top"
@@ -101,10 +101,10 @@ function Home() {
           </Col>
         </Row>
       </Container>
-      <Container className="mt-3 ms-0 mb-4">
+      <Container className="mt-3 ms-0 mb-4 d-flex justify-content-start">
         <Row>
           {events.slice(0, 3).map((event, index) => (
-            <Col key={index} className="d-flex justify-content-start align-items-center ">
+            <Col key={index} className="d-flex align-items-center ">
               <Card className="me-3" style={{ width: "18rem", height: "22rem" }}>
                 <Card.Img
                   variant="top"

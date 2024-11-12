@@ -18,6 +18,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(""); // To store user details after login
   const [familyMembers, setFamilyMembers] = useState([]); //Get family members
   const [petList, setPetList] = useState([]); //Get List of pets
+  const [petDetails, setPetDetails] = useState(null); // State to store fetched pet details
+
 
   const BASE_URL = "http://localhost:8000";
 
@@ -88,8 +90,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("user", JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
-        setAuthError(null); // Clear any existing error
-        return true; // Return true for successful login
+        setAuthError(null); 
+        return true; 
       } else {
         throw new Error("Login failed: Invalid response status");
       }
@@ -245,7 +247,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error("CSRF token not found in cookies");
       }
   
-      const response = await axios.get(`${BASE_URL}/web/account/member-list`, {
+      const response = await axios.get(`${BASE_URL}/web/account/member/member-list`, {
         headers: {
           "Content-Type": "application/json",
           "X-XSRF-TOKEN": decodeURIComponent(token),
@@ -385,7 +387,7 @@ export const AuthProvider = ({ children }) => {
         console.log("Pet added successfully:", response.data);
         const updatedUser = { ...user, pets_count: user.pets_count + 1 };
         localStorage.setItem('user', JSON.stringify(updatedUser)); 
-        await getPetList(); // Fetch updated pet list after successful addition
+        await getPetList();
       } else {
         throw new Error("Failed to add pet");
       }
@@ -424,8 +426,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.status === 200) {
-        setPetList(response.data); // Extracting the data array directly
-        console.log(petList);
+        setPetList(response.data); 
+        console.log("petList: " , response.data);
       } 
       else {
         throw new Error("Failed to fetch list of pets");
@@ -486,6 +488,47 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getPetDetails = async (petId) => {
+    const isLoginPage = window.location.pathname === '/signin';
+  
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+  
+      console.log("TOKEN: " + token);
+      const response = await axios.get(`${BASE_URL}/web/pet/pet-detail/${petId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        console.log("Pet Details: ", response.data);
+        setPetDetails(response.data); 
+      } else {
+        throw new Error("Failed to fetch pet details");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pet details");
+      }
+      throw error;
+    }
+  };
+  
+
 
   useEffect(() => {
     setAuthError(null);
@@ -522,6 +565,8 @@ export const AuthProvider = ({ children }) => {
     getPetList,
     petList,
     deletePet,
+    getPetDetails,
+    petDetails
   };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;

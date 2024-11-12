@@ -6,11 +6,10 @@ import {
   Button,
   Form,
   Image,
-  Overlay,
   Spinner,
 } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
-import { FiEdit } from "react-icons/fi"; // Import the edit icon
+import { FiEdit } from "react-icons/fi";
 
 function Profile() {
   const { user, updateUser } = useAuth();
@@ -18,14 +17,43 @@ function Profile() {
   // State for form fields
   const [firstName, setFirstName] = useState(user.first_name || "");
   const [lastName, setLastName] = useState(user.last_name || "");
-  const [gender, setGender] = useState(user.gender || "");
   const [dob, setDob] = useState(user.dob || "");
-  const [phone, setPhone] = useState(user.phone || "");
-  // const [address, setAddress] = useState('887 Northlake Place, Waterloo');
-  // const [province, setProvince] = useState('ON');
-  // const [petsOwned, setPetsOwned] = useState('3');
+  const [email, setEmail] = useState(user.email || "null");
+  const [phone, setPhone] = useState(user.phone || "null");
+  const [addressStreetName, setAddressStreetName] = useState(
+    user.address.street_name || "null"
+  );
+  const [addressCity, setAddressCity] = useState(
+    user.address.city || "null"
+  );
+  const [addressProvince, setAddressProvince] = useState(
+    user.address.province || "null"
+  );
+  const [addressPostalCode, setAddressPostalCode] = useState(
+    user.address.postal_code || "null"
+  );
+  const [addressCountry, setAddressCountry] = useState(
+    user.address.country || "null"
+  );
+  const [petsOwned, setPetsOwned] = useState(user.pets_count || 0);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // State for loading
+  const [isLoading, setIsLoading] = useState(false);
+
+  const provinces = [
+    { value: "AB", label: "Alberta" },
+    { value: "BC", label: "British Columbia" },
+    { value: "MB", label: "Manitoba" },
+    { value: "NB", label: "New Brunswick" },
+    { value: "NL", label: "Newfoundland and Labrador" },
+    { value: "NS", label: "Nova Scotia" },
+    { value: "ON", label: "Ontario" },
+    { value: "PE", label: "Prince Edward Island" },
+    { value: "QC", label: "Quebec" },
+    { value: "SK", label: "Saskatchewan" },
+    { value: "NT", label: "Northwest Territories" },
+    { value: "NU", label: "Nunavut" },
+    { value: "YT", label: "Yukon" },
+  ];
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -37,16 +65,13 @@ function Profile() {
       await updateUser({
         first_name: firstName,
         last_name: lastName,
-        role: "null",
-        email: "null",
-        phone: phone,
-        pets_count: user.pets_count,
-        is_form_filled: "0",
-        address_street_name: "null",
-        address_city: "Waterloo",
-        address_province: "null",
-        address_postal_code: "null",
-        address_country: "null",
+        email: email,
+        phone: phone ? phone : "null",
+        address_street_name: addressStreetName,
+        address_city: addressCity,
+        address_province: addressProvince,
+        address_postal_code: addressPostalCode,
+        address_country: addressCountry,
       });
       alert("Profile updated successfully!");
       setIsEditing(false);
@@ -74,168 +99,195 @@ function Profile() {
             {user.first_name} {user.last_name}
           </h2>
           <p>
-            {user.gender}
-            <br />
             {user.email}
             <br />
-            {"user.address"}
-            <br />
-            12 Pet Events Attended
+            {/* Display Address Info Properly */}
+            {user.address && `${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}
           </p>
-          <a href="#" className="view-btn">
-            {`${user.pets_count} Pets`}
-          </a>
-          
-          <Button variant="secondary" href="/managepets">Manage Pets</Button>
+          <a href="#" className="view-btn">{`${petsOwned} Pets`}</a>
+          <Button variant="secondary" href="/managepets">
+            Manage Pets
+          </Button>
         </Col>
-        <Row>
-          <Col md={12}>
-            <h3 className="mt-5">
-              Edit Profile
-              <Button variant="link" onClick={handleEdit} className="mb-2">
-                <FiEdit size={20} />
+      </Row>
+      <Row>
+        <Col md={12}>
+          <h3 className="mt-5">
+            Edit Profile
+            <Button variant="link" onClick={handleEdit} className="mb-2">
+              <FiEdit size={20} />
+            </Button>
+          </h3>
+          <Form className="mt-3">
+            {/* Personal Information */}
+            <Row>
+              <Col md={6}>
+                <h6 className="text-muted fw-bold">Personal Information</h6>
+                <Form.Group>
+                  <Form.Label className="mt-2">First Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label className="mt-2">Last Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Contact Information */}
+              <Col md={6}>
+                <h6 className="text-muted fw-bold">Contact Information</h6>
+                <Form.Group>
+                  <Form.Label className="mt-2">Email</Form.Label>
+                  <Form.Control type="email" value={email} disabled />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label className="mt-2">Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      phone === "null"
+                        ? "Enter Phone Number"
+                        : phone
+                    }
+                    value={phone  === "null" ? "" : phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            {/* Address Information */}
+            <Row>
+              <Col md={12}>
+                <h6 className="text-muted fw-bold mt-3">Address Information</h6>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">Address 1</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      addressStreetName === "null"
+                        ? "Enter Street Name"
+                        : addressStreetName
+                    }
+                    value={addressStreetName === "null" ? "" : addressStreetName}
+                    onChange={(e) => setAddressStreetName(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">City</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      addressCity === "null"
+                        ? "Enter City"
+                        : addressCity
+                    }
+                    value={addressCity === "null" ? "" : addressCity}
+                    onChange={(e) => setAddressCity(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">Province</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={addressProvince}
+                    onChange={(e) => setAddressProvince(e.target.value)}
+                    disabled={!isEditing}
+                  >
+                    <option value="">Select Province</option>
+                    {provinces.map((province) => (
+                      <option key={province.value} value={province.value}>
+                        {province.label}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">Postal Code</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      addressPostalCode === "null"
+                        ? "Enter Postal Code"
+                        : addressPostalCode
+                    }
+                    value={
+                      addressPostalCode === "null" ? "" : addressPostalCode
+                    }
+                    onChange={(e) => setAddressPostalCode(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">Country</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={
+                      addressCountry === "null"
+                        ? "Enter Country"
+                        : addressCountry
+                    }
+                    value={addressCountry === "null" ? "" : addressCountry}
+                    onChange={(e) => setAddressCountry(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            {/* Pet Information */}
+            <Row>
+              <Col md={12}>
+                <h6 className="text-muted fw-bold mt-3">Pet Information</h6>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="mt-2">Pets Owned</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={petsOwned === "null" ? "No pets added" : petsOwned}
+                    disabled
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            {/* Save Button */}
+            <Row>
+              <Button
+                variant="danger"
+                className="mt-3"
+                onClick={handleSave}
+                disabled={!isEditing}
+              >
+                {isLoading ? <Spinner /> : "Save"}
               </Button>
-            </h3>
-            <Form className="mt-3">
-              <Row>
-                <Col md={6}>
-                  <h6 className="text-muted fw-bold">Personal Information</h6>
-                  <Row md={12}>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label className="mt-2">First Name</Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Enter First Name"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          disabled={!isEditing}
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label className="mt-2">Surname</Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Enter Last Name"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          disabled={!isEditing}
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                </Col>
-                <Col md={6}>
-                  <h6 className="text-muted fw-bold">Contact Information</h6>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder={user.email}
-                      value={user.email}
-                      disabled={true}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Gender</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={user.gender ? user.gender : "Enter Gender"}
-                      value={user.gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Date of Birth</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter DOB"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Address</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter Address"
-                      // value={address}
-                      // onChange={(e) => setAddress(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Province</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter Province"
-                      // value={province}
-                      // onChange={(e) => setProvince(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Pets Owned</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Pets Owned"
-                      // value={petsOwned}
-                      // onChange={(e) => setPetsOwned(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label className="mt-2">Phone Number</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={
-                        user.phone !== "null"
-                          ? user.phone
-                          : "Enter Phone Number"
-                      }
-                      onChange={(e) => setPhone(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Button
-                  variant="danger"
-                  className="mt-3"
-                  onClick={handleSave}
-                  disabled={!isEditing}
-                >
-                  {" "}
-                  {isLoading ? <Spinner></Spinner> : "Save"}
-                </Button>
-              </Row>
-              {/* <Button variant="outline-danger" className="me-2 mt-3">Reset Password</Button> */}
-            </Form>
-          </Col>
-        </Row>
+            </Row>
+          </Form>
+        </Col>
       </Row>
     </Container>
   );
