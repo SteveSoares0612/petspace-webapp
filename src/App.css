@@ -3,10 +3,10 @@
 }
 
 :root {
-  --bs-danger: #DD595D !important;  /* Background color */
-  --bs-danger-bg: #DD595D !important;  /* Background color */
-  --bs-danger-border-color : #DD595D !important;  /* Border color */
-  --bs-danger-text: white !important;  /* Text color */
+  --bs-danger: #dd595d !important; /* Background color */
+  --bs-danger-bg: #dd595d !important; /* Background color */
+  --bs-danger-border-color: #dd595d !important; /* Border color */
+  --bs-danger-text: white !important; /* Text color */
 }
 
 .App-logo {
@@ -44,30 +44,29 @@
   }
 }
 
-html, body {
-  height: 100%; 
-  margin: 0; 
+html,
+body {
+  height: 100%;
+  margin: 0;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensures the app takes at least the full height of the viewport */
+  min-height: 100vh;
 }
 
 main {
-  flex-grow: 1; /* Allows the main content to grow and take available space */
+  flex-grow: 1;
 }
 
 footer {
-  /* Optional: add styles to your footer for better visibility */
-  background-color: #f8f9fa; /* Adjust based on your design */
+  background-color: #f8f9fa;
 }
 
 .flex-grow-1 {
-  flex-grow: 1; 
+  flex-grow: 1;
 }
-
 
 .app-container {
   display: flex;
@@ -76,6 +75,5 @@ footer {
 }
 
 .flex-grow-1 {
-  flex: 1; 
+  flex: 1;
 }
-

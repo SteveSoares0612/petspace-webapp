@@ -6,10 +6,10 @@ import {
   Button,
   Card,
   Form,
-  Modal,
 } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import "../managePets/ManagePets.css";
+import CustomModal  from "../../components/CustomModal";
 
 function Family() {
   const {
@@ -134,7 +134,7 @@ function Family() {
                       <div className="d-flex align-items-center">
                         <div className="pet-image-col">
                           <img
-                            src={"https://media.istockphoto.com/id/1171169127/photo/headshot-of-cheerful-handsome-man-with-trendy-haircut-and-eyeglasses-isolated-on-gray.jpg?s=612x612&w=0&k=20&c=yqAKmCqnpP_T8M8I5VTKxecri1xutkXH7zfybnwVWPQ="} // Ensure you have a valid image source
+                            src={member.profile_image} // Ensure you have a valid image source
                             alt={member.name}
                             className="rounded-circle pet-image"
                             style={{ width: "5rem", height: "5rem" }}
@@ -170,24 +170,19 @@ function Family() {
           </Row>
         )}
 
-        {/* Confirmation Modal */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Are you sure you want to remove this user from your family? This
-            action can be reversed, and the user can be added back at any time.
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDeleteMember}>
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        {/* Confirmation Modal */}     
+        <CustomModal
+          show={showModal}
+          title="Confirm Deletion"
+          message="Are you sure you want to remove this user from your family? This
+            action can be reversed, and the user can be added back at any time."
+          onClose={() => setShowModal(false)} 
+          onConfirm={confirmDeleteMember} 
+          showConfirm={true}
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger" 
+        />
       </Container>
     </div>
   );

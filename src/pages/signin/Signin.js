@@ -38,7 +38,8 @@ const SignIn = () => {
   };
 
   return (
-    <Container className="vh-100 bg-dark">
+    
+    <Container>
       <Row className="h-100">
         {/* Left Side - Image Carousel */}
         <Col

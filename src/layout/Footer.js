@@ -17,7 +17,7 @@ function Footer() {
               <Nav.Link as={Link} to="/home">Home</Nav.Link>
               <Nav.Link as={Link} to="/events">Events</Nav.Link>
               <Nav.Link as={Link} to="/health">My Health</Nav.Link>
-              <Nav.Link as={Link} to="/shop">Shop</Nav.Link>
+             
             </Nav>
           </Col>
 

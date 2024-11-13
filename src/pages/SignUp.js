@@ -81,7 +81,7 @@ const SignUp = () => {
   };
 
   return (
-    <Container className="vh-100 bg-dark">
+    <Container className="">
       <Row className="h-100">
         {/* Left Side - Image Carousel */}
         <Col
@@ -106,7 +106,7 @@ const SignUp = () => {
           md={6}
           className="d-flex align-items-center justify-content-center bg-right"
         >
-          <div className="w-100 ms-3">
+          <div className="w-100 ms-3 mt-4">
             <h2 className="text-start">Hey there! Welcome!</h2>
             <p className="text-start mt-3">Create your account to register with PetSpace!.</p>
 
@@ -189,7 +189,7 @@ const SignUp = () => {
                   {loading ? "Signing up..." : "Register"}
                 </Button>
               </div>
-              <div className="text-center mt-2">
+              <div className="text-center mt-2 mb-5">
                 <small>
                   Already have an account?{" "}
                   <a href="/signin" className="link-color">
