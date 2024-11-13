@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 
 import previewImage from "../../assets/images/previewImage.jpg";
+import CustomModal  from "../../components/CustomModal";
 
 import { Link } from "react-router-dom";
 import "./ManagePets.css";
@@ -20,6 +21,7 @@ const ManagePets = () => {
   const { petList, addPet, deletePet, getPetList } = useAuth();
   const [pets, setPets] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const [showAddPetForm, setShowAddPetForm] = useState(false);
   const [petToDelete, setPetToDelete] = useState(null);
 
@@ -88,6 +90,7 @@ const ManagePets = () => {
         console.error("Failed to save pet:", error);
       }
     } else {
+      
       alert("Please enter both the name and breed of the pet.");
     }
   };
@@ -371,20 +374,18 @@ const ManagePets = () => {
         )}
       </Container>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Pet</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this pet?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={confirmDeletePet}>
-            Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Confirmation Modal */}     
+      <CustomModal
+          show={showModal}
+          title="Confirm Deletion"
+          message="Are you sure you want to delete this pet?"
+          onClose={() => setShowModal(false)} 
+          onConfirm={confirmDeletePet} 
+          showConfirm={true}
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger" 
+        />
     </div>
   );
 };

@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import CustomModal from "../components/CustomModal";
 
 // Create AuthContext
 const AuthContext = createContext();
@@ -14,12 +15,13 @@ export const useAuth = () => {
 // AuthProvider component to provide auth state and functions
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authError, setAuthError] = useState(null); // Store any error during authentication
-  const [user, setUser] = useState(""); // To store user details after login
-  const [familyMembers, setFamilyMembers] = useState([]); //Get family members
-  const [petList, setPetList] = useState([]); //Get List of pets
-  const [petDetails, setPetDetails] = useState(null); // State to store fetched pet details
-
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [authError, setAuthError] = useState(null);
+  const [user, setUser] = useState("");
+  const [familyMembers, setFamilyMembers] = useState([]);
+  const [petList, setPetList] = useState([]);
+  const [petDetails, setPetDetails] = useState(null);
 
   const BASE_URL = "http://localhost:8000";
 
@@ -67,9 +69,8 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
-
         const data = response.data.data; // Access the 'data' object in the response
-        console.log(data)
+        console.log(data);
         const userData = {
           id: data.id,
           first_name: data.first_name,
@@ -85,14 +86,14 @@ export const AuthProvider = ({ children }) => {
           address: data.address,
           pets_count: data.pets_count,
           phone: data.phone,
-          profile_image: data.profile_image
+          profile_image: data.profile_image,
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
-        setAuthError(null); 
-        return true; 
+        setAuthError(null);
+        return true;
       } else {
         throw new Error("Login failed: Invalid response status");
       }
@@ -236,26 +237,29 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getFamilyMembers = async () => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("XSRF-TOKEN="))
         ?.split("=")[1];
-  
+
       if (!token) {
         throw new Error("CSRF token not found in cookies");
       }
-  
-      const response = await axios.get(`${BASE_URL}/web/account/member/member-list`, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-XSRF-TOKEN": decodeURIComponent(token),
-        },
-        withCredentials: true,
-      });
-  
+
+      const response = await axios.get(
+        `${BASE_URL}/web/account/member/member-list`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
       if (response.status === 200) {
         setFamilyMembers(response.data.list); // Extracting the data array directly
       } else {
@@ -269,14 +273,12 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.error("Error fetching family members:", error);
       }
-      throw error; 
+      throw error;
     }
   };
-  
-  
 
   const addFamilyMember = async (email) => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
@@ -303,22 +305,29 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         setFamilyMembers(response.data);
       } else {
-        throw new Error("Failed to add family member");
+        setModalMessage(response.data.message || "Failed to add family member");
+        setShowModal(true);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        if (!isLoginPage) {
-          setIsAuthenticated(false); 
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          if (!isLoginPage) {
+            setIsAuthenticated(false);
+          }
+        } else if (error.response?.data?.message) {
+          setModalMessage(error.response.data.message);
+          setShowModal(true);
         }
       } else {
         console.error("Error adding family members:", error);
+        setModalMessage("An unexpected error occurred. Please try again.");
+          setShowModal(true);
       }
-      throw error; // Throw error so it can be caught by the calling function
     }
   };
 
   const deleteFamilyMember = async (id) => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
@@ -344,14 +353,18 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         return true;
       } else {
-        throw new Error("Failed to delete family member");
+        setModalMessage(response.data.message || "Failed to delete family member");
+        setShowModal(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (!isLoginPage) {
           setIsAuthenticated(false);
         }
-       
+        else if (error.response?.data?.message) {
+          setModalMessage(error.response.data.message);
+          setShowModal(true);
+        }
       } else {
         console.error("Error deleting family members:", error);
       }
@@ -360,7 +373,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const addPet = async (name, breed, animal_type, dob, color, gender) => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
@@ -387,25 +400,30 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 201) {
         console.log("Pet added successfully:", response.data);
         const updatedUser = { ...user, pets_count: user.pets_count + 1 };
-        localStorage.setItem('user', JSON.stringify(updatedUser)); 
+        localStorage.setItem("user", JSON.stringify(updatedUser));
         await getPetList();
       } else {
-        throw new Error("Failed to add pet");
+        setModalMessage(response.data.message || "Failed to add pet");
+        setShowModal(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (!isLoginPage) {
           setIsAuthenticated(false);
         }
+        else if (error.response?.data?.message) {
+          setModalMessage(error.response.data.message);
+          setShowModal(true);
+        }
       } else {
         console.error("Error adding pets:", error);
       }
-      throw error;
+     
     }
   };
 
   const getPetList = async () => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
@@ -427,10 +445,9 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.status === 200) {
-        setPetList(response.data); 
-        console.log("petList: " , response.data);
-      } 
-      else {
+        setPetList(response.data);
+        console.log("petList: ", response.data);
+      } else {
         throw new Error("Failed to fetch list of pets");
       }
     } catch (error) {
@@ -446,7 +463,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const deletePet = async (petid) => {
-    const isLoginPage = window.location.pathname === '/signin';
+    const isLoginPage = window.location.pathname === "/signin";
 
     try {
       const token = document.cookie
@@ -471,7 +488,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         const updatedUser = { ...user, pets_count: user.pets_count - 1 };
-        localStorage.setItem('user', JSON.stringify(updatedUser)); 
+        localStorage.setItem("user", JSON.stringify(updatedUser));
         return true;
       } else {
         throw new Error("Failed to delete pet");
@@ -481,7 +498,6 @@ export const AuthProvider = ({ children }) => {
         if (!isLoginPage) {
           setIsAuthenticated(false);
         }
-       
       } else {
         console.error("Error deleting pet:", error);
       }
@@ -490,30 +506,33 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getPetDetails = async (petId) => {
-    const isLoginPage = window.location.pathname === '/signin';
-  
+    const isLoginPage = window.location.pathname === "/signin";
+
     try {
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("XSRF-TOKEN="))
         ?.split("=")[1];
-  
+
       if (!token) {
         throw new Error("CSRF token not found in cookies");
       }
-  
+
       console.log("TOKEN: " + token);
-      const response = await axios.get(`${BASE_URL}/web/pet/pet-detail/${petId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-XSRF-TOKEN": decodeURIComponent(token),
-        },
-        withCredentials: true,
-      });
-  
+      const response = await axios.get(
+        `${BASE_URL}/web/pet/pet-detail/${petId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
       if (response.status === 200) {
         console.log("Pet Details: ", response.data);
-        setPetDetails(response.data); 
+        setPetDetails(response.data);
       } else {
         throw new Error("Failed to fetch pet details");
       }
@@ -528,7 +547,7 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
-  
+
   const uploadUserImage = async (file) => {
     try {
       // Retrieve the CSRF token from cookies
@@ -542,25 +561,31 @@ export const AuthProvider = ({ children }) => {
       }
 
       const formData = new FormData();
-      formData.append('image', file);  // Append the image file
-      formData.append('filename', file.name);  // Append the image filename
+      formData.append("image", file); // Append the image file
+      formData.append("filename", file.name); // Append the image filename
 
       // Send the image to the server
       const response = await axios.post(
-        'http://localhost:8000/web/account/change-avatar', 
-        formData, 
+        "http://localhost:8000/web/account/change-avatar",
+        formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-            'X-XSRF-TOKEN': decodeURIComponent(token),
+            "Content-Type": "multipart/form-data",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
           },
           withCredentials: true,
         }
       );
 
       if (response.status === 200) {
-        console.log('Image uploaded successfully:', response.data);
-        return response.data; // Return the response if needed
+        console.log("Image uploaded successfully:", response.data.image_url);
+        const updatedUserImage = {
+          ...user,
+          profile_image: response.data.image_url,
+        };
+        localStorage.setItem("user", JSON.stringify(updatedUserImage));
+        window.location.reload();
+        return response.data;
       } else {
         throw new Error("Failed to upload image");
       }
@@ -569,7 +594,6 @@ export const AuthProvider = ({ children }) => {
       throw error; // Throw error so it can be caught by the calling function
     }
   };
-
 
   useEffect(() => {
     setAuthError(null);
@@ -608,8 +632,24 @@ export const AuthProvider = ({ children }) => {
     deletePet,
     getPetDetails,
     petDetails,
-    uploadUserImage
+    uploadUserImage,
   };
 
-  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
+  
+
+  return <AuthContext.Provider value={values}><>
+  {children}
+  <CustomModal
+          show={showModal}
+          title="Failed"
+          message={modalMessage} 
+          showCancel={false}
+          variant="danger" 
+          onConfirm={() => setShowModal(false)} 
+          showConfirm={true}
+          confirmText="Close"
+    />
+  </>
+    
+    </AuthContext.Provider>;
 };

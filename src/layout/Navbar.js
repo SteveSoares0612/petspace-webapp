@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { FaSignOutAlt, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 
 import ProfileIcon from "../assets/images/myprofileicon.png";
+import ImagePreview from "../assets/images/previewImage.jpg";
 import editPetsIcon from "../assets/images/editpets.png";
 import FamilyIcon from "../assets/images/famiylIcon.png";
 import LogoutIcon from "../assets/images/logout.png";
@@ -36,8 +37,6 @@ function AppNavbar() {
 
         {/* Hamburger menu for mobile */}
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-
-        {/* Links */}
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/home">
@@ -47,18 +46,25 @@ function AppNavbar() {
               Events
             </Nav.Link>
             <Nav.Link as={Link} to="/health">
-              My Health
+              Health
             </Nav.Link>
-            <Nav.Link as={Link} to="/shop">
-              Shop
-            </Nav.Link>
+            
           </Nav>
 
           {/* Authentication Links on the right as Dropdown */}
           <Nav className="ms-auto">
             {isAuthenticated ? (
               <NavDropdown
-                title={`Welcome, ${user.first_name}`}
+                title={<>
+                  <img
+                    src={user.profile_image ? user.profile_image : ImagePreview}
+                    alt="Profile"
+                    className="me-2 rounded-circle"
+                    width={24}
+                    height={24}
+                  />
+                  {`Welcome, ${user.first_name}`}
+                </>}
                 id="user-dropdown"
                 align="end"
               >

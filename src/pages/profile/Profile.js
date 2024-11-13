@@ -1,15 +1,8 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Form,
-  Image,
-  Spinner,
-} from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Spinner } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FiEdit } from "react-icons/fi";
+
 import previewImage from "../../assets/images/previewImage.jpg";
 
 function Profile() {
@@ -18,7 +11,6 @@ function Profile() {
   // State for form fields
   const [firstName, setFirstName] = useState(user.first_name || "");
   const [lastName, setLastName] = useState(user.last_name || "");
-  const [dob, setDob] = useState(user.dob || "");
   const [email, setEmail] = useState(user.email || "null");
   const [phone, setPhone] = useState(user.phone || "null");
   const [addressStreetName, setAddressStreetName] = useState(
@@ -57,21 +49,19 @@ function Profile() {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
-// Image upload function with API call
-const handleImageChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result); // Preview the image
-    };
-    reader.readAsDataURL(file);
-    setSelectedFile(file); // Set the selected file for the upload
-    uploadUserImage(file); // Call the upload function
-  }
-};
-
-
+  // Image upload function with API call
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file); // Set the selected file for the upload
+      uploadUserImage(file); // Call the upload function
+    }
+  };
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -108,7 +98,7 @@ const handleImageChange = (e) => {
           <div className="image-upload-container text-center">
             <div className="image-box position-relative">
               <img
-                src={imagePreview || previewImage}
+                src={user.profile_image ? user.profile_image : imagePreview}
                 alt="Pet Profile"
                 className="img-fluid rounded"
                 style={{
