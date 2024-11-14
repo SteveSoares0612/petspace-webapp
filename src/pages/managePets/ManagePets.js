@@ -119,8 +119,8 @@ const ManagePets = () => {
   const getDisplayText = (value, defaultText) => (value ? value : defaultText);
 
   // Determine if there are both dog and cat types in pets
-  const hasDogs = pets.some((pet) => pet.animal_type === "dog");
-  const hasCats = pets.some((pet) => pet.animal_type === "cat");
+  const hasDogs = pets.some((pet) => pet.animal_type === "Dog");
+  const hasCats = pets.some((pet) => pet.animal_type === "Cat");
 
   console.log(pets);
   return (
@@ -282,7 +282,7 @@ const ManagePets = () => {
                     <h4 className="pet-section-title">Dogs</h4>
                     <Row>
                       {pets
-                        ?.filter((pet) => pet.animal_type === "dog")
+                        ?.filter((pet) => pet.animal_type === "Dog")
                         .map((pet) => (
                           <Col md={4} key={pet.id}>
                             <Card className="pet-card mb-4">
@@ -328,7 +328,7 @@ const ManagePets = () => {
                     <h4 className="pet-section-title">Cats</h4>
                     <Row>
                       {pets
-                        .filter((pet) => pet.animal_type === "cat")
+                        .filter((pet) => pet.animal_type === "Cat")
                         .map((pet) => (
                           <Col md={4} key={pet.id}>
                             <Card className="pet-card mb-4">

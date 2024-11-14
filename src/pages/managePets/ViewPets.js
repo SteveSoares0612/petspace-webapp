@@ -26,6 +26,7 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
+import { type } from "@testing-library/user-event/dist/type";
 
 function ViewPets() {
   // Retrieve pet id from the URL params
@@ -42,6 +43,20 @@ function ViewPets() {
   const [petBreed, setPetBreed] = useState("Unknown");
   const [isEditing, setIsEditing] = useState(false);
   const [petType, setPetType] = useState("Unkown");
+  const [bio, setBio] = useState();
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalData, setModalData] = useState({
+    name: "",
+    description: "",
+    date: "",
+  });
+  const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
     getPetDetails(id);
@@ -56,8 +71,9 @@ function ViewPets() {
       setColor(petDetails.color || "Unknown");
       setIsMicrochipped(petDetails.is_microchipped);
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
-      setPetType(petDetails.type || "Unknown");
-      console.log("Microchipped", isMicrochipped)
+      setPetType(petDetails.animal_type || "Unknown");
+      setBio(petDetails.bio || "");
+      
     }
   }, [petDetails]);
 
@@ -98,18 +114,7 @@ function ViewPets() {
     ]);
   };
 
-  const [attachments, setAttachments] = useState([]);
-
-  // Modal states
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [modalData, setModalData] = useState({
-    name: "",
-    description: "",
-    date: "",
-  });
-  const [editIndex, setEditIndex] = useState(null);
+ 
 
   // Modal functions for adding/editing
   const handleShowModal = (type, index = null) => {
@@ -179,6 +184,7 @@ function ViewPets() {
         is_spayed_neutered: isSpayedNeutered,
         is_microchipped: isMicrochipped,
         image: selectedFile,
+        bio:bio
       });
       alert("Profile updated successfully!");
     } catch (error) {
@@ -186,6 +192,7 @@ function ViewPets() {
     } finally {
       setIsLoading(false);
       setIsEditing(false);
+      setIsEditingBio(false)
     }
   };
 
@@ -307,12 +314,6 @@ function ViewPets() {
     }
   };
 
-  // New state for bio
-  const [bio, setBio] = useState(
-    "Poppy is a spirited Golden Retriever with a heart full of love and a nose for adventure. This 4-year-old sweetheart enjoys long walks in the park, chasing after tennis balls, and playing fetch with her favorite squeaky toys. Poppy loves belly rubs and will happily roll over to show off her fluffy belly—if you want to win her trust, that's the quickest way! While she adores treats, Poppy has a slight allergy to chicken, so her human makes sure to keep her snacks chicken-free. She also dislikes loud noises and thunderstorms, often seeking refuge under the bed during storms. With a gentle nature and a wagging tail, Poppy is always ready for new friends and exciting adventures!"
-  );
-  const [isEditingBio, setIsEditingBio] = useState(false);
-
   return (
     <Container className="my-5">
       <Breadcrumb>
@@ -362,6 +363,20 @@ function ViewPets() {
             </Form.Group>
           ) : (
             <h2>{petName}</h2>
+          )}
+          {isEditing ? (
+            <Form.Group>
+              <Form.Label className="mt-2">Choose Type</Form.Label>
+              <Form.Select
+                value={petType}
+                onChange={(e) => setIsSpayedNeutered(e.target.value)}
+              >
+                <option value={"Dog"}>Dog</option>
+                <option value={"Cat"}>Cat</option>
+              </Form.Select>
+            </Form.Group>
+          ) : (
+            <p>Type: {petType}</p>
           )}
           {isEditing ? (
             <Form.Group>
@@ -492,7 +507,7 @@ function ViewPets() {
               />
               <Button
                 variant="outline-secondary"
-                onClick={() => setIsEditingBio(false)}
+                onClick={() => handleSave()}
                 className="mt-2"
               >
                 Save
@@ -551,7 +566,7 @@ function ViewPets() {
           <h4 className="text-danger mt-4">History & Health</h4>
           <h5 className="mt-3">Vet Summary</h5>
           <p>
-            Poppy is a healthy and active 4-year-old Golden Retriever. She has
+          Poppy is a healthy and active 4-year-old Golden Retriever. She has
             no significant health conditions but has a mild allergy to chicken,
             which her owner manages by ensuring her diet is free from
             chicken-based products. Regular vet check-ups confirm she is up to

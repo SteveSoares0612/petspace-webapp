@@ -623,13 +623,16 @@ export const AuthProvider = ({ children }) => {
         console.log(updatedPet)
        
       } else {
-        throw new Error("Failed to update profile");
+        setModalMessage(response.data.message || "Failed to update pet");
+        setShowModal(true);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error; // Throw error so it can be caught by the calling function
     }
   };
+
+  
 
   useEffect(() => {
     setAuthError(null);
