@@ -596,6 +596,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updatePet = async (updatedPetData) => {
+    const isLoginPage = window.location.pathname === "/signin";
     try {
       const token = document.cookie
         .split("; ")
@@ -627,8 +628,17 @@ export const AuthProvider = ({ children }) => {
         setShowModal(true);
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      throw error; // Throw error so it can be caught by the calling function
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+        else if (error.response?.data?.message) {
+          setModalMessage(error.response.data.message);
+          setShowModal(true);
+        }
+      } else {
+        console.error("Error updating pet:", error);
+      }
     }
   };
 

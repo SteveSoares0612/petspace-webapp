@@ -43,7 +43,7 @@ function ViewPets() {
   const [petBreed, setPetBreed] = useState("Unknown");
   const [isEditing, setIsEditing] = useState(false);
   const [petType, setPetType] = useState("Unkown");
-  const [bio, setBio] = useState();
+  const [bio, setBio] = useState(null);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [attachments, setAttachments] = useState([]);
 
@@ -72,7 +72,7 @@ function ViewPets() {
       setIsMicrochipped(petDetails.is_microchipped);
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
       setPetType(petDetails.animal_type || "Unknown");
-      setBio(petDetails.bio || "");
+      setBio(petDetails.bio);
       
     }
   }, [petDetails]);
@@ -183,8 +183,8 @@ function ViewPets() {
         id: id,
         is_spayed_neutered: isSpayedNeutered,
         is_microchipped: isMicrochipped,
-        image: selectedFile,
-        bio:bio
+        pet_image: selectedFile,
+        bio:String(bio)
       });
       alert("Profile updated successfully!");
     } catch (error) {
@@ -369,7 +369,7 @@ function ViewPets() {
               <Form.Label className="mt-2">Choose Type</Form.Label>
               <Form.Select
                 value={petType}
-                onChange={(e) => setIsSpayedNeutered(e.target.value)}
+                onChange={(e) => setPetType(e.target.value)}
               >
                 <option value={"Dog"}>Dog</option>
                 <option value={"Cat"}>Cat</option>
@@ -483,7 +483,7 @@ function ViewPets() {
       </Row>
 
       {/* Tabs Section */}
-      <Tabs defaultActiveKey="history" id="pet-history-tabs" className="mb-3">
+      <Tabs defaultActiveKey="overview" id="pet-history-tabs" className="mb-3">
         <Tab eventKey="overview" title="Overview">
           <div className="d-flex align-items-center mt-4">
             <h4 className="mb-0">Bio</h4>
