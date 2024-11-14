@@ -531,8 +531,8 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
-        console.log("Pet Details: ", response.data);
         setPetDetails(response.data);
+      
       } else {
         throw new Error("Failed to fetch pet details");
       }
@@ -595,6 +595,42 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updatePet = async (updatedPetData) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/update/`,
+        updatedPetData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        const updatedPet = response.data;
+        console.log(updatedPet)
+       
+      } else {
+        throw new Error("Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
+
   useEffect(() => {
     setAuthError(null);
     const storedUser = localStorage.getItem("user");
@@ -633,6 +669,7 @@ export const AuthProvider = ({ children }) => {
     getPetDetails,
     petDetails,
     uploadUserImage,
+    updatePet
   };
 
   
