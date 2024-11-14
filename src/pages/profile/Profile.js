@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button, Form, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Spinner,Card } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FiEdit } from "react-icons/fi";
 
@@ -93,20 +93,12 @@ function Profile() {
   return (
     <Container className="p-4">
       {/* Profile Info Section */}
-      <Row>
-        <Col md={2} className="text-center mt-4">
+      
+      <Row className="mb-4">
+        <Col md={4}>
+          <Card.Img variant="top"  src={user.profile_image ? user.profile_image : imagePreview} alt="Profile Image" rounded />
           <div className="image-upload-container text-center">
             <div className="image-box position-relative">
-              <img
-                src={user.profile_image ? user.profile_image : imagePreview}
-                alt="Pet Profile"
-                className="img-fluid rounded"
-                style={{
-                  width: "100%",
-                  maxHeight: "250px",
-                  objectFit: "cover",
-                }}
-              />
               <Button
                 variant="primary"
                 className="position-absolute bottom-0 end-0 m-2"
@@ -124,17 +116,13 @@ function Profile() {
             </div>
           </div>
         </Col>
-        <Col md={8} className="text-start mt-4">
-          <h2>
-            {user.first_name} {user.last_name}
-          </h2>
-          <p>
-            {user.email}
-            <br />
-            {/* Display Address Info Properly */}
-            {user.address &&
-              `${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}
-          </p>
+        <Col md={8}>
+          <h2>{user.first_name} {user.last_name}</h2>
+          <p>Address: {user.address &&`${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}</p>
+          {/* <p>Born: April 16, 2024</p>
+          <p>Owner: Leslie Lexington</p>
+          <p>Weight: 55 lbs</p>
+          <p>Color: Ash Grey</p> */}
           <a href="#" className="view-btn">{`${petsOwned} Pets`}</a>
           <Button variant="secondary" href="/managepets">
             Manage Pets

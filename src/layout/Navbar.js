@@ -23,10 +23,6 @@ function AppNavbar() {
     navigate("/signin");
   };
 
-  useEffect(() => {
-    console.log(user.address);
-  });
-
   return (
     <Navbar bg="light" expand="lg" className="py-3">
       <Container>
