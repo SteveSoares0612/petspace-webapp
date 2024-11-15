@@ -335,7 +335,7 @@ function ViewPets() {
             <div className="image-box position-relative">
               <Button
                 variant="primary"
-                className="position-absolute bottom-0 end-0 m-2"
+                className="bottom-0 m-2"
                 onClick={() => document.getElementById("imageUpload").click()}
               >
                 Upload Image
@@ -593,7 +593,7 @@ function ViewPets() {
                 <Badge
                   bg="white" // White background
                   text="danger" // Pink text (bootstrap's "danger" is pink)
-                  className="p-2 w-100 d-inline-block text-start"
+                  className="p-2 w-100 d-inline-block text-center"
                   style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                 >
                   {allergy}
