@@ -33,7 +33,7 @@ function ViewPets() {
   // Retrieve pet id from the URL params
 
   const { id } = useParams();
-  const { user, updatePet, petDetails, getPetDetails } = useAuth();
+  const { user, updatePet, petDetails, getPetDetails, uploadPetImage, getAllergenList, allergenList } = useAuth();
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -48,6 +48,8 @@ function ViewPets() {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [selectedFile, setSelectedFile] = useState(previewImage);
+
+  const [allergens, setAllergens] = useState([]);
   
 
   // Modal states
@@ -86,8 +88,15 @@ function ViewPets() {
     }
   }, [petDetails]);
 
+  useEffect(() => {
+    if (allergenList ) {
+      setAllergens(allergenList);
+      console.log(allergens)
+    }
+  }, [allergenList]);
+
   // Initial data as JSON arrays
-  const [allergies, setAllergies] = useState(["Peanuts", "Mold", "Metal"]);
+  const [allergies, setAllergies] = useState([]);
   const [specialConditions, setSpecialConditions] = useState([
     "Anemia",
     "Fleas",
@@ -136,6 +145,10 @@ function ViewPets() {
     setShowModal(true); // Open the modal
   };
 
+  useEffect(() => {
+    console.log("Updated Allergies ", allergies)
+  }, [allergies])
+
   const handleCloseModal = () => {
     setShowModal(false);
     setModalData({ name: "", description: "", date: "" });
@@ -149,18 +162,21 @@ function ViewPets() {
   };
 
   const setDataArray = (type, newArray) => {
-    if (type === "allergy") setAllergies(newArray);
+    if (type === "allergy") { setAllergies(newArray); }
     if (type === "specialCondition") setSpecialConditions(newArray);
     if (type === "reminder") setReminders(newArray);
   };
 
   const handleSaveModal = () => {
+   
     const dataArray = getDataArray(modalType); // Get the correct array based on modal type
     const newArray = [...dataArray];
 
     if (modalType === "allergy" || modalType === "specialCondition") {
       if (editIndex === null) {
         newArray.push(modalData.name); // Push name (string) only for allergies/conditions
+        console.log("Allergies = ", newArray); //ADD API CALL HERE
+      
       } else {
         newArray[editIndex] = modalData.name; // Update with the new name
       }
@@ -192,9 +208,9 @@ function ViewPets() {
       formData.append("is_microchipped", isMicrochipped);
       formData.append("bio", String(bio));
 
-      if (selectedFile) {
-        formData.append("image", selectedFile); // Appends the image file as is
-      }
+      // if (selectedFile) {
+      //   formData.append("image", selectedFile); // Appends the image file as is
+      // }
 
       await updatePet(formData);
       setModalMessage("Pet profile updated successfully!");
@@ -311,32 +327,22 @@ function ViewPets() {
     setAppointments(updatedAppointments);
   };
 
-  
-
-  // // Image upload function with API call
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setSelectedFile(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //     setSelectedFile(file); // Set the selected file for the upload
-  //     handleSave();
-  //   }
-  // };
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);  // Store the raw file, no need for FileReader or base64 encoding
-      handleSave();  // You can call the save function here
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedFile(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      uploadPetImage(file, id); // Call the upload function
     }
   };
 
   
   return (
-    <Container className="my-5">
+    <Container className="my-3">
       <Breadcrumb>
         <Breadcrumb.Item href="/home">Home</Breadcrumb.Item>
         <Breadcrumb.Item href="/managepets">Manage Pets</Breadcrumb.Item>
@@ -609,9 +615,9 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {allergies.map((allergy, index) => (
+            {allergies ? allergies.map((allergy, index) => (
               <Col sm={4} key={index} className="mb-2">
-                <Badge
+               <Badge
                   bg="white" // White background
                   text="danger" // Pink text (bootstrap's "danger" is pink)
                   className="p-2 w-100 d-inline-block text-start"
@@ -624,9 +630,10 @@ function ViewPets() {
                   >
                     <FaEdit />
                   </span>
-                </Badge>
-              </Col>
-            ))}
+                </Badge> 
+                
+              </Col> 
+            )): "" } 
           </Row>
 
           {/* Special Conditions */}
