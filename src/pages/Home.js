@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { FaChevronRight, FaSearchLocation } from "react-icons/fa"; 
+import { Link } from "react-router-dom";
+import { FaChevronRight, FaSearchLocation } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 
 import dog1 from "../assets/images/dog1.jpg";
 import dog2 from "../assets/images/dog2.jpg";
 import dog3 from "../assets/images/dog3.jpg";
 import "../pages/signin/signIn.css";
+import previewImage from "../assets/images/previewImage.jpg";
 
 function Home() {
   const { petList } = useAuth();
@@ -14,45 +16,42 @@ function Home() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-
-    console.log(petList)
+    console.log(petList);
     if (petList && petList.pets_owned) {
       setPets(petList.pets_owned.slice(0, 3));
     }
   }, [petList]);
 
   useEffect(() => {
-    
     const eventData = [
       {
-        title: 'International Pet Day',
-        date: 'Wed, Apr 28',
-        time: '5:30 PM',
-        address: '36 Guild Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://img.pikbest.com/origin/06/18/92/40cpIkbEsTeXT.jpg',
+        title: "International Pet Day",
+        date: "Wed, Apr 28",
+        time: "5:30 PM",
+        address: "36 Guild Street London, UK",
+        price: "FREE",
+        imageUrl: "https://img.pikbest.com/origin/06/18/92/40cpIkbEsTeXT.jpg",
       },
       {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',
+        title: "Pet Care Workshop",
+        date: "Thu, May 13",
+        time: "10:00 AM",
+        address: "45 Pet Street London, UK",
+        price: "FREE",
+        imageUrl: "https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg",
       },
       {
-        title: 'Adoption Event',
-        date: 'Fri, May 14',
-        time: '2:00 PM',
-        address: '28 Groom Avenue London, UK',
-        price: 'FREE',
-        imageUrl: 'https://kidlinks-assets.s3.amazonaws.com/uploads/Hugapalooza-2024-Flyer-SQUARE-1.png',
+        title: "Adoption Event",
+        date: "Fri, May 14",
+        time: "2:00 PM",
+        address: "28 Groom Avenue London, UK",
+        price: "FREE",
+        imageUrl:
+          "https://kidlinks-assets.s3.amazonaws.com/uploads/Hugapalooza-2024-Flyer-SQUARE-1.png",
       },
     ];
     setEvents(eventData);
   }, []);
-
-  
 
   return (
     <>
@@ -61,7 +60,7 @@ function Home() {
           <Col className="d-flex justify-content-between align-items-center">
             <h2>My Pets</h2>
             <a
-              href="/managepets" 
+              href="/managepets"
               className="d-flex align-items-center link-dark link-underline-opacity-0"
             >
               <span>see all</span>
@@ -74,32 +73,37 @@ function Home() {
         <Row>
           {pets.map((pet) => (
             <Col key={pet.id} className="">
-            <Card className="me-3" style={{ width: "18rem", height: "18rem" }}>
-              {/* Card Image Wrapper with position relative */}
-              <div className="position-relative">
-                <Card.Img
-                  variant="top"
-                  src="https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg?cs=srgb&dl=pexels-svetozar-milashevich-99573-1490908.jpg&fm=jpg"
-                  style={{ height: "12rem", objectFit: "cover" }}
-                />
-                
-                {/* View Pet Button */}
-                <Button
-                  variant="primary"
-                  className="position-absolute start-50 translate-middle-x mb-0"
-                  style={{ zIndex: 1, bottom: "-18px" }}
-                >
-                  View Pet
-                </Button>
-              </div>
-          
-              {/* Card Body */}
-              <Card.Body>
-                <Card.Title>{pet.name}</Card.Title>
-                <Card.Text>{pet.breed}</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
+              <Card
+                className="me-3"
+                style={{ width: "18rem", height: "18rem" }}
+              >
+                {/* Card Image Wrapper with position relative */}
+                <div className="position-relative">
+                  <Card.Img
+                    variant="top"
+                    src={pet.pet_image || previewImage}
+                    style={{ height: "12rem", objectFit: "cover" }}
+                  />
+
+                  {/* View Pet Button */}
+                  <Button
+                    variant="primary"
+                    className="position-absolute start-50 translate-middle-x mb-0 text-align-center"
+                    style={{ zIndex: 1, bottom: "-18px" }}
+                  >
+                    <Link to={`/viewpets/${pet.id}`} className="view-btn" style={{color:"white"}}>
+                      View
+                    </Link>
+                  </Button>
+                </div>
+
+                {/* Card Body */}
+                <Card.Body>
+                  <Card.Title>{pet.name}</Card.Title>
+                  <Card.Text>{pet.breed}</Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
           ))}
         </Row>
       </Container>
@@ -121,22 +125,35 @@ function Home() {
         <Row>
           {events.slice(0, 3).map((event, index) => (
             <Col key={index} className="d-flex align-items-center ">
-              <Card className="me-3" style={{ width: "18rem", height: "22rem" }}>
+              <Card
+                className="me-3"
+                style={{ width: "18rem", height: "22rem" }}
+              >
                 <Card.Img
                   variant="top"
                   src={event.imageUrl}
                   style={{ height: "12rem", objectFit: "cover" }}
                 />
                 <Card.Body>
-                  <Card.Text className="card-txt-date"><b>{event.date} • {event.time}</b></Card.Text>
-                  <Card.Title><b>{event.title}</b></Card.Title>
+                  <Card.Text className="card-txt-date">
+                    <b>
+                      {event.date} • {event.time}
+                    </b>
+                  </Card.Text>
+                  <Card.Title>
+                    <b>{event.title}</b>
+                  </Card.Title>
                   <Card.Text className="card-txt-location mb-3">
                     <FaSearchLocation className="ms-1" />
-                    <span className="ms-1"><b>{event.address}</b></span>
+                    <span className="ms-1">
+                      <b>{event.address}</b>
+                    </span>
                   </Card.Text>
                   <div className="d-flex justify-content-between align-items-center">
                     <Button className="btn-color">Book Now</Button>
-                    <span className="yellow-txt me-3"><b>{event.price}</b></span>
+                    <span className="yellow-txt me-3">
+                      <b>{event.price}</b>
+                    </span>
                   </div>
                 </Card.Body>
               </Card>
