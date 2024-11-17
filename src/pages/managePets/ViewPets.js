@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Redirect } from "react";
 import {
   Container,
   Row,
@@ -26,7 +26,8 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
-import { type } from "@testing-library/user-event/dist/type";
+import CustomModal from "../../components/CustomModal";
+
 
 function ViewPets() {
   // Retrieve pet id from the URL params
@@ -46,9 +47,13 @@ function ViewPets() {
   const [bio, setBio] = useState(null);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(previewImage);
+  
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [modalData, setModalData] = useState({
@@ -76,6 +81,10 @@ function ViewPets() {
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
       setPetType(petDetails.animal_type || "Unknown");
       setBio(petDetails.bio);
+      setSelectedFile(petDetails.pet_image == null ? previewImage : petDetails.pet_image)
+      // setSelectedFile(petDetails.pet_image)
+
+      console.log("Pet Image is ", petDetails)
 
     }
   }, [petDetails]);
@@ -144,8 +153,6 @@ function ViewPets() {
       newAppointment,
     ]);
   };
-
-
 
   // Modal functions for adding/editing
   const handleShowModal = (type, index = null) => {
@@ -248,27 +255,33 @@ function ViewPets() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await updatePet({
-        pet_owner_id: user.id,
-        breed: petBreed,
-        animal_type: petType,
-        dob: dob,
-        color: color ? color : "null",
-        gender: gender,
-        name: petName,
-        id: id,
-        is_spayed_neutered: isSpayedNeutered,
-        is_microchipped: isMicrochipped,
-        pet_image: selectedFile,
-        bio: String(bio)
-      });
-      alert("Profile updated successfully!");
+      const formData = new FormData();
+      formData.append("pet_owner_id", user.id);
+      formData.append("breed", petBreed);
+      formData.append("animal_type", petType);
+      formData.append("dob", dob);
+      formData.append("color", color ? color : "null");
+      formData.append("gender", gender);
+      formData.append("name", petName);
+      formData.append("id", id);
+      formData.append("is_spayed_neutered", isSpayedNeutered);
+      formData.append("is_microchipped", isMicrochipped);
+      formData.append("bio", String(bio));
+
+      if (selectedFile) {
+        formData.append("image", selectedFile); // Appends the image file as is
+      }
+
+      await updatePet(formData);
+      setModalMessage("Pet profile updated successfully!");
+      setShowConfirmModal(true)
     } catch (error) {
-      alert("Failed to update profile");
+      console.log(error)
+      alert("Failed to update pet profile", error);
     } finally {
       setIsLoading(false);
       setIsEditing(false);
-      setIsEditingBio(false)
+      setIsEditingBio(false);
     }
   };
 
@@ -374,22 +387,30 @@ function ViewPets() {
     setAppointments(updatedAppointments);
   };
 
-  const [selectedFile, setSelectedFile] = useState(previewImage);
+  
 
-  // Image upload function with API call
+  // // Image upload function with API call
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setSelectedFile(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //     setSelectedFile(file); // Set the selected file for the upload
+  //     handleSave();
+  //   }
+  // };
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setSelectedFile(file); // Set the selected file for the upload
-      handleSave()
+      setSelectedFile(file);  // Store the raw file, no need for FileReader or base64 encoding
+      handleSave();  // You can call the save function here
     }
   };
 
+  
   return (
     <Container className="my-5">
       <Breadcrumb>
@@ -1103,6 +1124,19 @@ function ViewPets() {
           </Button>
         </Modal.Footer>
       </Modal>
+{/* confirmation modal */}
+      <CustomModal
+          show={showConfirmModal}
+          title="Success!"
+          message={modalMessage}
+          showCancel={false}
+          cancelText={"Close"}
+          variant="success"
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={() => setShowConfirmModal(false)}
+          showConfirm={true}
+          confirmText="Close"
+        />
     </Container>
   );
 }

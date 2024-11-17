@@ -74,18 +74,32 @@ function Home() {
         <Row>
           {pets.map((pet) => (
             <Col key={pet.id} className="">
-              <Card className="me-3" style={{ width: "18rem", height: "18rem" }}>
+            <Card className="me-3" style={{ width: "18rem", height: "18rem" }}>
+              {/* Card Image Wrapper with position relative */}
+              <div className="position-relative">
                 <Card.Img
                   variant="top"
-                  src= "https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg?cs=srgb&dl=pexels-svetozar-milashevich-99573-1490908.jpg&fm=jpg" 
+                  src="https://images.pexels.com/photos/1490908/pexels-photo-1490908.jpeg?cs=srgb&dl=pexels-svetozar-milashevich-99573-1490908.jpg&fm=jpg"
                   style={{ height: "12rem", objectFit: "cover" }}
                 />
-                <Card.Body>
-                  <Card.Title>{pet.name}</Card.Title>
-                  <Card.Text>{pet.breed}</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
+                
+                {/* View Pet Button */}
+                <Button
+                  variant="primary"
+                  className="position-absolute start-50 translate-middle-x mb-0"
+                  style={{ zIndex: 1, bottom: "-18px" }}
+                >
+                  View Pet
+                </Button>
+              </div>
+          
+              {/* Card Body */}
+              <Card.Body>
+                <Card.Title>{pet.name}</Card.Title>
+                <Card.Text>{pet.breed}</Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
           ))}
         </Row>
       </Container>

@@ -16,6 +16,7 @@ import { useAuth } from './context/AuthContext'; // Use useAuth
 import LandingPage from './pages/landingPage/LandingPage';
 import Family from './pages/familyPage/Family'
 import ViewPets from './pages/managePets/ViewPets';
+import NotFound from './pages/NotFoundPage';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth(); // Get authentication state from context
@@ -25,6 +26,7 @@ const AppRoutes = () => {
       <Row>
         <Col md={12}>
           <Routes>
+            <Route path="*" element={<NotFound />} /> {/* Catch-all */}
             <Route path="/" element={<LandingPage /> } />
             <Route path="/home" element={isAuthenticated ? <Home /> : <SignIn />} />
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
