@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [familyMembers, setFamilyMembers] = useState([]);
   const [petList, setPetList] = useState([]);
   const [allergenList, setAllergenList] = useState([]);
+  const [specialConditonList, setSpecialConditionList] = useState([]);
   const [petDetails, setPetDetails] = useState(null);
 
   const BASE_URL = "http://localhost:8000";
@@ -766,6 +767,49 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         console.error("Failed to update pet allergies");
+      }
+      throw error;
+    }
+  };
+
+  const getSpecConditionList = async (petId) => {
+    const isLoginPage = window.location.pathname === "/signin";
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      console.log("TOKEN: " + token);
+      const response = await axios.get(
+        `${BASE_URL}/web/pet/${petId}/special-cond/list`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        setSpecialConditionList(response.data);
+        console.log("Special Conditions: ", response.data.list);
+      } else {
+        throw new Error("Failed to fetch list of pets");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pets");
       }
       throw error;
     }

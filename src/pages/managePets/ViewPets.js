@@ -39,8 +39,7 @@ function ViewPets() {
     getPetDetails,
     uploadPetImage,
     allergenList,
-    addPetAllergen,
-  } = useAuth();
+    addPetAllergen,  } = useAuth();
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -197,6 +196,7 @@ function ViewPets() {
       console.log("Allergen ID: ", allergenID);
     }
   }, [allergies, allergenID]);
+  
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -237,8 +237,10 @@ function ViewPets() {
               id: modalData.id,
               allergen: selectedAllergen.allergen,
             },
+           
           ]);
-          setAllergenID(modalData.id);
+          setAllergenID(modalData.id)
+         
         }
       } else {
         // Editing existing allergy
@@ -267,7 +269,9 @@ function ViewPets() {
               id: modalData.id,
               condition: selectedCondition.condition,
             },
-          ]);
+          
+          ],);
+         
         }
       } else {
         // Editing existing condition
@@ -1038,7 +1042,9 @@ function ViewPets() {
                   onChange={(e) => {
                     const selected = e.target.value;
                     const options =
-                      modalType === "allergy" ? allergenList : conditionOptions;
+                      modalType === "allergy"
+                        ? allergenList
+                        : conditionOptions;
                     const item = options.find(
                       (opt) => opt.id === Number(selected)
                     );
