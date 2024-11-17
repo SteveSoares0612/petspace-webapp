@@ -52,9 +52,12 @@ function ViewPets() {
   const [modalType, setModalType] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [modalData, setModalData] = useState({
-    name: "",
+    id: null,
+    name: "", //  for reminders
+    allergen: "", // for allergies
+    condition: "",
     description: "",
-    date: "",
+    date: ""
   });
   const [editIndex, setEditIndex] = useState(null);
 
@@ -73,16 +76,44 @@ function ViewPets() {
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
       setPetType(petDetails.animal_type || "Unknown");
       setBio(petDetails.bio);
-      
+
     }
   }, [petDetails]);
 
+
+
+  const allergyOptions = [
+    { id: 1, allergen: "Peanuts" },
+    { id: 2, allergen: "Dairy" },
+    { id: 3, allergen: "Gluten" },
+    { id: 4, allergen: "Eggs" },
+    { id: 5, allergen: "Soy" },
+    { id: 6, allergen: "Fish" },
+    { id: 7, allergen: "Shellfish" },
+    { id: 8, allergen: "Tree Nuts" }
+  ];
+
+  const conditionOptions = [
+    { id: 1, condition: "Diabetes" },
+    { id: 2, condition: "Heart Disease" },
+    { id: 3, condition: "Arthritis" },
+    { id: 4, condition: "Kidney Disease" },
+    { id: 5, condition: "Thyroid Disorder" },
+    { id: 6, condition: "Anxiety" },
+    { id: 7, condition: "Skin Allergies" },
+    { id: 8, condition: "Hip Dysplasia" }
+  ];
+
+
   // Initial data as JSON arrays
-  const [allergies, setAllergies] = useState(["Peanuts", "Mold", "Metal"]);
-  const [specialConditions, setSpecialConditions] = useState([
-    "Anemia",
-    "Fleas",
+  const [allergies, setAllergies] = useState([
+    
   ]);
+
+  const [specialConditions, setSpecialConditions] = useState([
+  
+  ]);
+
   const [reminders, setReminders] = useState([
     {
       name: "Aspirin",
@@ -114,19 +145,34 @@ function ViewPets() {
     ]);
   };
 
- 
+
 
   // Modal functions for adding/editing
   const handleShowModal = (type, index = null) => {
     setModalType(type);
-    setEditIndex(index); // Set the edit index to edit an existing entry
+    setEditIndex(index);
+    
     if (index !== null) {
-      const dataArray = getDataArray(type); // Get the correct data array based on the type
-      setModalData({ ...dataArray[index] }); // Set modalData for editing
+      const dataArray = getDataArray(type);
+      const item = dataArray[index];
+      setModalData({
+        ...modalData,
+        id: item.id,
+        name: type === "allergy" ? item.allergen : 
+              type === "specialCondition" ? item.condition : 
+              item.name
+      });
     } else {
-      setModalData({ name: "", description: "", date: "" }); // Reset modalData for new entry
+      setModalData({
+        id: null,
+        name: "",
+        allergen: "",
+        condition: "",
+        description: "",
+        date: ""
+      });
     }
-    setShowModal(true); // Open the modal
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
@@ -148,25 +194,55 @@ function ViewPets() {
   };
 
   const handleSaveModal = () => {
-    const dataArray = getDataArray(modalType); // Get the correct array based on modal type
-    const newArray = [...dataArray];
+    if (!modalData.id) return; // Don't save if no option selected
 
-    if (modalType === "allergy" || modalType === "specialCondition") {
+    if (modalType === "allergy") {
+      const selectedAllergen = allergyOptions.find(opt => opt.id === modalData.id);
+      if (!selectedAllergen) return;
+
       if (editIndex === null) {
-        newArray.push(modalData.name); // Push name (string) only for allergies/conditions
+        // Adding new allergy
+        const exists = allergies.some(item => item.id === modalData.id);
+        if (!exists) {
+          setAllergies(prev => [...prev, {
+            id: modalData.id,
+            allergen: selectedAllergen.allergen
+          }]);
+        }
       } else {
-        newArray[editIndex] = modalData.name; // Update with the new name
+        // Editing existing allergy
+        const updatedAllergies = [...allergies];
+        updatedAllergies[editIndex] = {
+          id: modalData.id,
+          allergen: selectedAllergen.allergen
+        };
+        setAllergies(updatedAllergies);
       }
-    } else if (modalType === "reminder") {
+    } else if (modalType === "specialCondition") {
+      const selectedCondition = conditionOptions.find(opt => opt.id === modalData.id);
+      if (!selectedCondition) return;
+
       if (editIndex === null) {
-        newArray.push(modalData); // Add entire reminder object
+        // Adding new condition
+        const exists = specialConditions.some(item => item.id === modalData.id);
+        if (!exists) {
+          setSpecialConditions(prev => [...prev, {
+            id: modalData.id,
+            condition: selectedCondition.condition
+          }]);
+        }
       } else {
-        newArray[editIndex] = modalData; // Update reminder object
+        // Editing existing condition
+        const updatedConditions = [...specialConditions];
+        updatedConditions[editIndex] = {
+          id: modalData.id,
+          condition: selectedCondition.condition
+        };
+        setSpecialConditions(updatedConditions);
       }
     }
-
-    setDataArray(modalType, newArray); // Update the state with the new array
-    handleCloseModal(); // Close the modal after saving
+ 
+    handleCloseModal();
   };
 
   const handleSave = async () => {
@@ -184,7 +260,7 @@ function ViewPets() {
         is_spayed_neutered: isSpayedNeutered,
         is_microchipped: isMicrochipped,
         pet_image: selectedFile,
-        bio:String(bio)
+        bio: String(bio)
       });
       alert("Profile updated successfully!");
     } catch (error) {
@@ -219,7 +295,7 @@ function ViewPets() {
       const newAttachment = {
         name: file.name,
         date: new Date().toLocaleDateString(), // Current date in 'MM/DD/YYYY' format
-        file: file, 
+        file: file,
       };
       setAttachments((prevAttachments) => [...prevAttachments, newAttachment]);
       setFile(null);
@@ -566,7 +642,7 @@ function ViewPets() {
           <h4 className="text-danger mt-4">History & Health</h4>
           <h5 className="mt-3">Vet Summary</h5>
           <p>
-          Poppy is a healthy and active 4-year-old Golden Retriever. She has
+            Poppy is a healthy and active 4-year-old Golden Retriever. She has
             no significant health conditions but has a mild allergy to chicken,
             which her owner manages by ensuring her diet is free from
             chicken-based products. Regular vet check-ups confirm she is up to
@@ -588,25 +664,35 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {allergies.map((allergy, index) => (
-              <Col sm={4} key={index} className="mb-2">
-                <Badge
-                  bg="white" // White background
-                  text="danger" // Pink text (bootstrap's "danger" is pink)
-                  className="p-2 w-100 d-inline-block text-center"
-                  style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
-                >
-                  {allergy}
-                  <span
-                    onClick={() => handleShowModal("allergy", index)}
-                    className="ms-2 cursor-pointer text-pink"
-                  >
-                    <FaEdit />
-                  </span>
-                </Badge>
-              </Col>
-            ))}
-          </Row>
+      {allergies.length === 0 ? (
+        <Col>
+          <p className="text-muted">No allergies added yet</p>
+        </Col>
+      ) : (
+        allergies.map((allergy) => (
+          <Col sm={4} key={allergy.id} className="mb-2">
+            <Badge
+              bg="white"
+              text="danger"
+              className="p-2 w-100 d-inline-block text-center"
+              style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+            >
+              {allergy.allergen}
+              <span
+                onClick={() => {
+                  const index = allergies.findIndex(a => a.id === allergy.id);
+                  handleShowModal("allergy", index);
+                }}
+                className="ms-2 cursor-pointer text-pink"
+              >
+                <FaEdit />
+              </span>
+            </Badge>
+          </Col>
+        ))
+      )}
+    </Row>
+         
 
           {/* Special Conditions */}
           <h5 className="mt-4">Special Conditions</h5>
@@ -619,25 +705,34 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {specialConditions.map((condition, index) => (
-              <Col sm={4} key={index} className="mb-2">
-                <Badge
-                  bg="white"
-                  text="danger"
-                  className="p-2 w-100 d-inline-block text-center"
-                  style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
-                >
-                  {condition}
-                  <span
-                    onClick={() => handleShowModal("specialCondition", index)}
-                    className="ms-2 cursor-pointer"
-                  >
-                    <FaEdit />
-                  </span>
-                </Badge>
-              </Col>
-            ))}
-          </Row>
+  {specialConditions.length === 0 ? (
+    <Col>
+      <p className="text-muted">No special conditions added yet</p>
+    </Col>
+  ) : (
+    specialConditions.map((condition) => (
+      <Col sm={4} key={condition.id} className="mb-2">
+        <Badge
+          bg="white"
+          text="danger"
+          className="p-2 w-100 d-inline-block text-center"
+          style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+        >
+          {condition.condition}
+          <span
+            onClick={() => {
+              const index = specialConditions.findIndex(c => c.id === condition.id);
+              handleShowModal("specialCondition", index);
+            }}
+            className="ms-2 cursor-pointer text-pink"
+          >
+            <FaEdit />
+          </span>
+        </Badge>
+      </Col>
+    ))
+  )}
+</Row>
 
           {/* Reminders */}
           <h5 className="mt-4">Reminders</h5>
@@ -887,62 +982,82 @@ function ViewPets() {
 
       {/* Modal for Adding/Editing Items */}
       <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editIndex !== null ? "Edit" : "Add"}{" "}
-            {modalType === "reminder" ? "Reminder" : "Item"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={modalData.name}
-                onChange={(e) =>
-                  setModalData({ ...modalData, name: e.target.value })
-                }
-              />
-            </Form.Group>
-            {modalType === "reminder" && (
-              <>
-                <Form.Group>
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={modalData.description}
-                    onChange={(e) =>
-                      setModalData({
-                        ...modalData,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={modalData.date}
-                    onChange={(e) =>
-                      setModalData({ ...modalData, date: e.target.value })
-                    }
-                  />
-                </Form.Group>
-              </>
-            )}
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSaveModal}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      {editIndex !== null ? "Edit" : "Add"}{" "}
+      {modalType === "reminder" ? "Reminder" : 
+       modalType === "allergy" ? "Allergy" : "Condition"}
+    </Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      {(modalType === "allergy" || modalType === "specialCondition") ? (
+        <Form.Group>
+          <Form.Label>
+            Select {modalType === "allergy" ? "Allergen" : "Condition"}
+          </Form.Label>
+          <Form.Select
+            value={modalData.id || ""}
+            onChange={(e) => {
+              const selected = e.target.value;
+              const options = modalType === "allergy" ? allergyOptions : conditionOptions;
+              const item = options.find(opt => opt.id === Number(selected));
+              if (item) {
+                setModalData({
+                  ...modalData,
+                  id: item.id,
+                  name: modalType === "allergy" ? item.allergen : item.condition
+                });
+              }
+            }}
+          >
+            <option value="">Select an option</option>
+            {(modalType === "allergy" ? allergyOptions : conditionOptions).map((option) => (
+              <option key={option.id} value={option.id}>
+                {modalType === "allergy" ? option.allergen : option.condition}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      ) : (
+        <>
+          <Form.Group>
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={modalData.name}
+              onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              type="text"
+              value={modalData.description}
+              onChange={(e) => setModalData({ ...modalData, description: e.target.value })}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              type="date"
+              value={modalData.date}
+              onChange={(e) => setModalData({ ...modalData, date: e.target.value })}
+            />
+          </Form.Group>
+        </>
+      )}
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      Close
+    </Button>
+    <Button variant="primary" onClick={handleSaveModal}>
+      Save
+    </Button>
+  </Modal.Footer>
+</Modal>
 
       {/* Reschedule Modal */}
       <Modal
