@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState("");
   const [familyMembers, setFamilyMembers] = useState([]);
   const [petList, setPetList] = useState([]);
+  const [allergenList, setAllergenList] = useState([]);
+  const [specialConditonList, setSpecialConditionList] = useState([]);
   const [petDetails, setPetDetails] = useState(null);
 
   const BASE_URL = "http://localhost:8000";
@@ -593,6 +595,54 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const uploadPetImage = async (file, petID) => {
+    try {
+      // Retrieve the CSRF token from cookies
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const formData = new FormData();
+      formData.append("image", file); // Append the image file
+      formData.append("pet_id", petID);
+      console.log(petID);
+
+      // Send the image to the server
+      const response = await axios.post(
+        "http://localhost:8000/web/pet/change-avatar",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Image uploaded successfully:", response.data.image_url);
+        // const updatedUserImage = {
+        //   ...user,
+        //   profile_image: response.data.image_url,
+        // };
+        // localStorage.setItem("user", JSON.stringify(updatedUserImage));
+        window.location.reload();
+        return response.data;
+      } else {
+        throw new Error("Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error; // Throw error so it can be caught by the calling function
+    }
+  };
+
   const updatePet = async (updatedPetData) => {
     const isLoginPage = window.location.pathname === "/signin";
     try {
@@ -607,7 +657,7 @@ export const AuthProvider = ({ children }) => {
 
       const response = await axios.post(
         `${BASE_URL}/web/pet/update/`,
-        updatedPetData, // This is your FormData
+        updatedPetData,
         {
           headers: {
             Accept: "application/json",
@@ -638,6 +688,133 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getAllergenList = async () => {
+    const isLoginPage = window.location.pathname === "/signin";
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      console.log("TOKEN: " + token);
+      const response = await axios.get(
+        `${BASE_URL}/web/pet/allergen-dictionary`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        setAllergenList(response.data.list);
+        // console.log("Allergin: ", response.data.list);
+      } else {
+        throw new Error("Failed to fetch list of pets");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pets");
+      }
+      throw error;
+    }
+  };
+
+  const addPetAllergen = async (petID, allergenID) => {
+    const isLoginPage = window.location.pathname === "/signin";
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/${petID}/allergy/add/${allergenID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Allergin: ", response.data);
+      } else {
+        throw new Error("Failed to update allergies");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Failed to update pet allergies");
+      }
+      throw error;
+    }
+  };
+
+  const getSpecConditionList = async (petId) => {
+    const isLoginPage = window.location.pathname === "/signin";
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      console.log("TOKEN: " + token);
+      const response = await axios.get(
+        `${BASE_URL}/web/pet/${petId}/special-cond/list`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        setSpecialConditionList(response.data);
+        console.log("Special Conditions: ", response.data.list);
+      } else {
+        throw new Error("Failed to fetch list of pets");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Error fetching pets");
+      }
+      throw error;
+    }
+  };
+
   useEffect(() => {
     setAuthError(null);
     const storedUser = localStorage.getItem("user");
@@ -654,6 +831,7 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       getFamilyMembers();
       getPetList();
+      getAllergenList();
     }
   }, [isAuthenticated]);
 
@@ -677,6 +855,10 @@ export const AuthProvider = ({ children }) => {
     petDetails,
     uploadUserImage,
     updatePet,
+    uploadPetImage,
+    allergenList,
+    getAllergenList,
+    addPetAllergen,
   };
 
   return (
