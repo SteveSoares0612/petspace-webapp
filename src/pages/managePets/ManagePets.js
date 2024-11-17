@@ -10,12 +10,13 @@ import {
 } from "react-bootstrap";
 
 import previewImage from "../../assets/images/previewImage.jpg";
-import CustomModal  from "../../components/CustomModal";
+import CustomModal from "../../components/CustomModal";
 
 import { Link } from "react-router-dom";
 import "./ManagePets.css";
 import deleteIcon from "../../assets/images/delete.png";
 import { useAuth } from "../../context/AuthContext";
+import ViewPets from "./ViewPets";
 
 const ManagePets = () => {
   const { petList, addPet, deletePet, getPetList } = useAuth();
@@ -49,7 +50,7 @@ const ManagePets = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        console.log(imagePreview)
+        console.log(imagePreview);
       };
       reader.readAsDataURL(file);
     }
@@ -90,7 +91,6 @@ const ManagePets = () => {
         console.error("Failed to save pet:", error);
       }
     } else {
-      
       alert("Please enter both the name and breed of the pet.");
     }
   };
@@ -115,7 +115,19 @@ const ManagePets = () => {
     }
   };
 
-  // Helper function to get display text for pet attributes
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob); // Parse the DOB string into a Date object
+    const today = new Date(); // Get the current date
+    let age = today.getFullYear() - birthDate.getFullYear(); // Calculate the difference in years
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+  
+    // If the current month is before the birth month or if it's the same month but the day hasn't passed yet
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--; // Subtract one year if the birthday hasn't happened yet this year
+    }
+    return age;
+  };
+
   const getDisplayText = (value, defaultText) => (value ? value : defaultText);
 
   // Determine if there are both dog and cat types in pets
@@ -236,7 +248,8 @@ const ManagePets = () => {
             {/* Image Upload Section */}
             <Col
               md={6}
-              className="d-flex align-items-start justify-content-center">
+              className="d-flex align-items-start justify-content-center"
+            >
               <div className="image-upload-container text-center">
                 <div className="image-box position-relative">
                   <img
@@ -287,34 +300,61 @@ const ManagePets = () => {
                           <Col md={4} key={pet.id}>
                             <Card className="pet-card mb-4">
                               <Card.Body>
-                                <h5 className="pet-info fw-bold">
-                                  {getDisplayText(pet.name, "Unnamed")}
-                                </h5>
-                                <p className="pet-info">
-                                  {`${getDisplayText(
-                                    pet.breed,
-                                    "Unknown Breed"
-                                  )}, ${getDisplayText(
-                                    pet.dob,
-                                    "Unknown"
-                                  )} Years`}
-                                </p>
-                                <Link
-                                  to={`/viewpets/${pet.id}`}
-                                  className="view-btn"
-                                >
-                                  View
-                                </Link>
-                                <Button
-                                  variant="danger"
-                                  onClick={() => handleDeleteMember(pet.id)}
-                                >
-                                  <img
-                                    src={deleteIcon}
-                                    alt="Delete"
-                                    width={22}
-                                  />
-                                </Button>
+                                <Row>
+                                  <Col
+                                    xs={4}
+                                    className="d-flex justify-content-center align-items-center"
+                                  >
+                                    <img
+                                      src={pet.pet_image || previewImage} // Fallback to previewImage if no pet_image
+                                      alt={pet.name}
+                                      className="pet-image img-fluid rounded"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "150px",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  </Col>
+
+                                  <Col xs={8}>
+                                    <h5 className="pet-info fw-bold">
+                                      {getDisplayText(pet.name, "Unnamed")}
+                                    </h5>
+                                    <p className="pet-info">{`${getDisplayText(
+                                      pet.breed,
+                                      "Unknown Breed"
+                                    )}, ${getDisplayText(
+                                      calculateAge(pet.dob),
+                                      "Unknown"
+                                    )} Years`}</p>
+
+                                    <div className="d-flex justify-content-between align-items-center mt-3">
+                                      <Link
+                                       to={{
+                                        pathname: "/viewpets",
+                                      }}
+                                      state={{ id: pet.id }}
+                                      onClick={()=> console.log(pet.id)}
+                                        className="view-btn"
+                                      >
+                                        View
+                                      </Link>
+                                      <Button
+                                        variant="danger"
+                                        onClick={() =>
+                                          handleDeleteMember(pet.id)
+                                        }
+                                      >
+                                        <img
+                                          src={deleteIcon}
+                                          alt="Delete"
+                                          width={22}
+                                        />
+                                      </Button>
+                                    </div>
+                                  </Col>
+                                </Row>
                               </Card.Body>
                             </Card>
                           </Col>
@@ -333,34 +373,60 @@ const ManagePets = () => {
                           <Col md={4} key={pet.id}>
                             <Card className="pet-card mb-4">
                               <Card.Body>
-                                <h5 className="pet-info fw-bold">
-                                  {getDisplayText(pet.name, "Unnamed")}
-                                </h5>
-                                <p className="pet-info">
-                                  {`${getDisplayText(
-                                    pet.breed,
-                                    "Unknown Breed"
-                                  )}, ${getDisplayText(
-                                    pet.dob,
-                                    "Unknown"
-                                  )} Years`}
-                                </p>
-                                <Link
-                                  to={`/viewpets/${pet.id}`}
-                                  className="view-btn"
-                                >
-                                  View
-                                </Link>
-                                <Button
-                                  variant="danger"
-                                  onClick={() => handleDeleteMember(pet.id)}
-                                >
-                                  <img
-                                    src={deleteIcon}
-                                    alt="Delete"
-                                    width={22}
-                                  />
-                                </Button>
+                                <Row>
+                                  <Col
+                                    xs={4}
+                                    className="d-flex justify-content-center align-items-center"
+                                  >
+                                    <img
+                                      src={pet.pet_image || previewImage} 
+                                      alt={pet.name}
+                                      className="pet-image img-fluid rounded"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "150px",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  </Col>
+                                  <Col xs={8}>
+                                    <h5 className="pet-info fw-bold">
+                                      {getDisplayText(pet.name, "Unnamed")}
+                                    </h5>
+                                    <p className="pet-info">{`${getDisplayText(
+                                      pet.breed,
+                                      "Unknown Breed"
+                                    )}, ${getDisplayText(
+                                      calculateAge(pet.dob),
+                                      "Unknown"
+                                    )} Years`}</p>
+
+                                    {/* Buttons Section (View and Delete on same line, opposite ends) */}
+                                    <div className="d-flex justify-content-between align-items-center mt-3">
+                                      <Link
+                                        to={{
+                                          pathname: "/viewpets",
+                                          state: { petId: pet.id }, 
+                                        }}
+                                        className="view-btn"
+                                      >
+                                        View
+                                      </Link>
+                                      <Button
+                                        variant="danger"
+                                        onClick={() =>
+                                          handleDeleteMember(pet.id)
+                                        }
+                                      >
+                                        <img
+                                          src={deleteIcon}
+                                          alt="Delete"
+                                          width={22}
+                                        />
+                                      </Button>
+                                    </div>
+                                  </Col>
+                                </Row>
                               </Card.Body>
                             </Card>
                           </Col>
@@ -374,18 +440,18 @@ const ManagePets = () => {
         )}
       </Container>
 
-      {/* Confirmation Modal */}     
+      {/* Confirmation Modal */}
       <CustomModal
-          show={showModal}
-          title="Confirm Deletion"
-          message="Are you sure you want to delete this pet?"
-          onClose={() => setShowModal(false)} 
-          onConfirm={confirmDeletePet} 
-          showConfirm={true}
-          confirmText="Delete"
-          cancelText="Cancel"
-          variant="danger" 
-        />
+        show={showModal}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this pet?"
+        onClose={() => setShowModal(false)}
+        onConfirm={confirmDeletePet}
+        showConfirm={true}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

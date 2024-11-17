@@ -321,7 +321,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.error("Error adding family members:", error);
         setModalMessage("An unexpected error occurred. Please try again.");
-          setShowModal(true);
+        setShowModal(true);
       }
     }
   };
@@ -353,15 +353,16 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         return true;
       } else {
-        setModalMessage(response.data.message || "Failed to delete family member");
+        setModalMessage(
+          response.data.message || "Failed to delete family member"
+        );
         setShowModal(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (!isLoginPage) {
           setIsAuthenticated(false);
-        }
-        else if (error.response?.data?.message) {
+        } else if (error.response?.data?.message) {
           setModalMessage(error.response.data.message);
           setShowModal(true);
         }
@@ -410,15 +411,13 @@ export const AuthProvider = ({ children }) => {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (!isLoginPage) {
           setIsAuthenticated(false);
-        }
-        else if (error.response?.data?.message) {
+        } else if (error.response?.data?.message) {
           setModalMessage(error.response.data.message);
           setShowModal(true);
         }
       } else {
         console.error("Error adding pets:", error);
       }
-     
     }
   };
 
@@ -532,7 +531,6 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         setPetDetails(response.data);
-      
       } else {
         throw new Error("Failed to fetch pet details");
       }
@@ -609,10 +607,10 @@ export const AuthProvider = ({ children }) => {
 
       const response = await axios.post(
         `${BASE_URL}/web/pet/update/`,
-        updatedPetData,
+        updatedPetData, // This is your FormData
         {
           headers: {
-            "Content-Type": "application/json",
+            Accept: "application/json",
             "X-XSRF-TOKEN": decodeURIComponent(token),
           },
           withCredentials: true,
@@ -621,8 +619,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         const updatedPet = response.data;
-        console.log(updatedPet)
-       
+        console.log(updatedPet);
       } else {
         setModalMessage(response.data.message || "Failed to update pet");
         setShowModal(true);
@@ -631,8 +628,7 @@ export const AuthProvider = ({ children }) => {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (!isLoginPage) {
           setIsAuthenticated(false);
-        }
-        else if (error.response?.data?.message) {
+        } else if (error.response?.data?.message) {
           setModalMessage(error.response.data.message);
           setShowModal(true);
         }
@@ -641,8 +637,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
   };
-
-  
 
   useEffect(() => {
     setAuthError(null);
@@ -682,24 +676,24 @@ export const AuthProvider = ({ children }) => {
     getPetDetails,
     petDetails,
     uploadUserImage,
-    updatePet
+    updatePet,
   };
 
-  
-
-  return <AuthContext.Provider value={values}><>
-  {children}
-  <CustomModal
+  return (
+    <AuthContext.Provider value={values}>
+      <>
+        {children}
+        <CustomModal
           show={showModal}
           title="Failed"
-          message={modalMessage} 
+          message={modalMessage}
           showCancel={false}
-          variant="danger" 
-          onConfirm={() => setShowModal(false)} 
+          variant="danger"
+          onConfirm={() => setShowModal(false)}
           showConfirm={true}
           confirmText="Close"
-    />
-  </>
-    
-    </AuthContext.Provider>;
+        />
+      </>
+    </AuthContext.Provider>
+  );
 };
