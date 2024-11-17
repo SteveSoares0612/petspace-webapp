@@ -22,7 +22,6 @@ const ManagePets = () => {
   const { petList, addPet, deletePet, getPetList } = useAuth();
   const [pets, setPets] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
   const [showAddPetForm, setShowAddPetForm] = useState(false);
   const [petToDelete, setPetToDelete] = useState(null);
 
@@ -33,6 +32,8 @@ const ManagePets = () => {
     dob: "",
     color: "",
     gender: "",
+    is_microchipped: "0",
+    is_spayed_neutered: "0",
   });
 
   // Update `pets` state whenever `petList` changes
@@ -42,28 +43,15 @@ const ManagePets = () => {
     }
   }, [petList]);
 
-  const [imagePreview, setImagePreview] = useState(null);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        console.log(imagePreview);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleAddPetClick = () => setShowAddPetForm(true);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewPet((prevPet) => ({
-      ...prevPet,
-      [name]: value,
-    }));
+    setNewPet((prevPet) => {
+      const updatedPet = { ...prevPet, [name]: value };
+      console.log("Updated Pet:", updatedPet);
+      return updatedPet;
+    });
   };
 
   const handleSavePet = async () => {
@@ -75,7 +63,9 @@ const ManagePets = () => {
           newPet.type,
           newPet.dob,
           newPet.color,
-          newPet.gender
+          newPet.gender,
+          newPet.is_microchipped,
+          newPet.is_spayed_neutered
         );
         setNewPet({
           name: "",
@@ -84,6 +74,8 @@ const ManagePets = () => {
           dob: "",
           color: "",
           gender: "",
+          is_microchipped: "0",
+          is_spayed_neutered: "0",
         });
         setShowAddPetForm(false);
         await getPetList(); // Refresh pet list after adding
@@ -118,14 +110,28 @@ const ManagePets = () => {
   const calculateAge = (dob) => {
     const birthDate = new Date(dob); // Parse the DOB string into a Date object
     const today = new Date(); // Get the current date
-    let age = today.getFullYear() - birthDate.getFullYear(); // Calculate the difference in years
+
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDifference = today.getMonth() - birthDate.getMonth();
-  
-    // If the current month is before the birth month or if it's the same month but the day hasn't passed yet
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-      age--; // Subtract one year if the birthday hasn't happened yet this year
+    const dayDifference = today.getDate() - birthDate.getDate();
+
+    // If the current date is before the birthday in the current year
+    if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+      age--; // Subtract one year if the birthday hasn't occurred yet this year
     }
-    return age;
+
+    if (age < 1) {
+      // Calculate months difference
+      const totalMonths =
+        (today.getFullYear() - birthDate.getFullYear()) * 12 +
+        today.getMonth() -
+        birthDate.getMonth();
+
+      const adjustedMonths = dayDifference < 0 ? totalMonths - 1 : totalMonths;
+      return `${adjustedMonths} month${adjustedMonths === 1 ? "" : "s"}`;
+    }
+
+    return `${age} year${age === 1 ? "" : "s"}`;
   };
 
   const getDisplayText = (value, defaultText) => (value ? value : defaultText);
@@ -157,20 +163,28 @@ const ManagePets = () => {
           <Row className="mt-3">
             <Col md={6}>
               <Form>
-                {/* Pet Details Form */}
-                <Form.Group controlId="petName">
-                  <Form.Label>Pet Name</Form.Label>
+                <Form.Group>
+                  <Form.Label className="mt-2">Enter Name</Form.Label>
                   <Form.Control
-                    type="text"
                     placeholder="Enter pet name"
                     name="name"
                     value={newPet.name}
                     onChange={handleInputChange}
                   />
                 </Form.Group>
-
-                <Form.Group controlId="petBreed" className="mt-3">
-                  <Form.Label>Breed</Form.Label>
+                <Form.Group>
+                  <Form.Label className="mt-2">Choose Type</Form.Label>
+                  <Form.Select
+                    name="type"
+                    value={newPet.type}
+                    onChange={handleInputChange}
+                  >
+                    <option value={"Dog"}>Dog</option>
+                    <option value={"Cat"}>Cat</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label className="mt-2">Enter Breed</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Enter breed"
@@ -179,41 +193,15 @@ const ManagePets = () => {
                     onChange={handleInputChange}
                   />
                 </Form.Group>
-
-                <Form.Group controlId="petType" className="mt-3">
-                  <Form.Label>Type</Form.Label>
+                <Form.Group>
+                  <Form.Label className="mt-2">Enter Date of Birth</Form.Label>
                   <Form.Control
-                    as="select"
-                    name="type"
-                    value={newPet.type}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
-                  </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="petDob" className="mt-3">
-                  <Form.Label>Date of Birth</Form.Label>
-                  <Form.Control
-                    type="date"
+                    type="Date"
                     name="dob"
                     value={newPet.dob}
                     onChange={handleInputChange}
                   />
                 </Form.Group>
-
-                <Form.Group controlId="petColor" className="mt-3">
-                  <Form.Label>Color</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter color"
-                    name="color"
-                    value={newPet.color}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-
                 <Form.Group controlId="petGender" className="mt-3">
                   <Form.Label>Gender</Form.Label>
                   <Form.Control
@@ -226,6 +214,41 @@ const ManagePets = () => {
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                   </Form.Control>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label className="mt-2">Enter Color</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter color"
+                    name="color"
+                    value={newPet.color}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label className="mt-2">Microchipped Status</Form.Label>
+                  <Form.Select
+                    name="is_microchipped"
+                    value={newPet.is_microchipped}
+                    onChange={handleInputChange}
+                  >
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group>
+                  <Form.Label className="mt-2">
+                    Spayed/Neutered Status
+                  </Form.Label>
+                  <Form.Select
+                    name="is_spayed_neutered"
+                    value={newPet.is_spayed_neutered}
+                    onChange={handleInputChange}
+                  >
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </Form.Select>
                 </Form.Group>
 
                 <Button
@@ -246,7 +269,7 @@ const ManagePets = () => {
             </Col>
 
             {/* Image Upload Section */}
-            <Col
+            {/* <Col
               md={6}
               className="d-flex align-items-start justify-content-center"
             >
@@ -280,7 +303,7 @@ const ManagePets = () => {
                   />
                 </div>
               </div>
-            </Col>
+            </Col> */}
           </Row>
         ) : (
           <>
@@ -327,7 +350,7 @@ const ManagePets = () => {
                                     )}, ${getDisplayText(
                                       calculateAge(pet.dob),
                                       "Unknown"
-                                    )} Years`}</p>
+                                    )}`}</p>
 
                                     <div className="d-flex justify-content-between align-items-center mt-3">
                                       <Link
@@ -375,7 +398,7 @@ const ManagePets = () => {
                                     className="d-flex justify-content-center align-items-center"
                                   >
                                     <img
-                                      src={pet.pet_image || previewImage} 
+                                      src={pet.pet_image || previewImage}
                                       alt={pet.name}
                                       className="pet-image img-fluid rounded"
                                       style={{
@@ -395,7 +418,7 @@ const ManagePets = () => {
                                     )}, ${getDisplayText(
                                       calculateAge(pet.dob),
                                       "Unknown"
-                                    )} Years`}</p>
+                                    )}`}</p>
 
                                     {/* Buttons Section (View and Delete on same line, opposite ends) */}
                                     <div className="d-flex justify-content-between align-items-center mt-3">

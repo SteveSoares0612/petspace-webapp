@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [petList, setPetList] = useState([]);
   const [allergenList, setAllergenList] = useState([]);
   const [petAllergies, setPetAllergies] = useState([]);
-  const [specialConditonList, setSpecialConditionList] = useState([]);
+  const [specialConditionList, setSpecialConditionList] = useState([]);
   const [petDetails, setPetDetails] = useState(null);
 
   const BASE_URL = "http://localhost:8000";
@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 204) {
         console.log("CSRF token fetched successfully");
       } else {
+        setIsAuthenticated(false);
         throw new Error("Failed to fetch CSRF token");
       }
     } catch (error) {
@@ -376,7 +377,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const addPet = async (name, breed, animal_type, dob, color, gender) => {
+  const addPet = async (name, breed, animal_type, dob, color, gender, is_microchipped, is_spayed_neutered ) => {
     const isLoginPage = window.location.pathname === "/signin";
 
     try {
@@ -391,7 +392,7 @@ export const AuthProvider = ({ children }) => {
 
       const response = await axios.post(
         `${BASE_URL}/web/pet/create`,
-        { name, breed, animal_type, dob, color, gender },
+        { name, breed, animal_type, dob, color, gender, is_microchipped, is_spayed_neutered },
         {
           headers: {
             "Content-Type": "application/json",
@@ -811,6 +812,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const addPetSpecCondition = async (petID, condition_name) => {
+    const isLoginPage = window.location.pathname === "/signin";
+
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+
+      if (!token) {
+        throw new Error("CSRF token not found in cookies");
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/${petID}/special-cond/add`,
+        {condition_name},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+    
+      if (response.status === 201) {
+        console.log(response.data.list);
+      
+      } else {
+
+        throw new Error("Failed to update allergies");
+      }
+    } catch (error) {
+      
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (!isLoginPage) {
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.error("Failed to update pet allergies", error);
+      }
+      throw error;
+    }
+  };
+
   const getSpecConditionList = async (petId) => {
     const isLoginPage = window.location.pathname === "/signin";
 
@@ -836,7 +882,7 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
-        setSpecialConditionList(response.data);
+        setSpecialConditionList(response.data.list);
         console.log("Special Conditions: ", response.data.list);
       } else {
         throw new Error("Failed to fetch list of pets");
@@ -870,7 +916,6 @@ export const AuthProvider = ({ children }) => {
       getFamilyMembers();
       getPetList();
       getAllergenList();
-      
     }
   }, [isAuthenticated]);
 
@@ -899,7 +944,10 @@ export const AuthProvider = ({ children }) => {
     getAllergenList,
     addPetAllergen,
     getPetAllergens,
-    petAllergies
+    petAllergies,
+    addPetSpecCondition,
+    getSpecConditionList,
+    specialConditionList,
   };
 
   return (
