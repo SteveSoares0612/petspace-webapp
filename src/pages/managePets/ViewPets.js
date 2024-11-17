@@ -66,15 +66,16 @@ function ViewPets() {
   const [modalType, setModalType] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [modalData, setModalData] = useState({
-    name: "",
+    id: null,
+    name: "", //  for reminders
+    allergen: "", // for allergies
+    condition: "",
     description: "",
-    date: "",
+    date: ""
   });
   const [editIndex, setEditIndex] = useState(null);
   const [allergies, setAllergies] = useState([]);
   const [specialConditions, setSpecialConditions] = useState([
-    "Anemia",
-    "Fleas",
   ]);
 
   useEffect(() => {
@@ -229,75 +230,53 @@ function ViewPets() {
   //   if (type === "reminder") setReminders(newArray);
   // };
 
-  const handleSaveModal = () => {
-    if (!modalData.id) return; // Don't save if no option selected
+const handleSaveModal = () => {
+  if (modalType === "specialCondition") {
+    const updatedConditions = [...specialConditions];
 
-    if (modalType === "allergy") {
-      const selectedAllergen = allergenList.find(
-        (opt) => opt.id === modalData.id
-      );
-      if (!selectedAllergen) return;
-
-      if (editIndex === null) {
-        // Adding new allergy
-        const exists = allergies.some((item) => item.id === modalData.id);
-        if (!exists) {
-          setAllergies((prev) => [
-            ...prev,
-            {
-              id: modalData.id,
-              allergen: selectedAllergen.allergen,
-            },
-           
-          ]);
-          setAllergenID(modalData.id)
-         
-        }
-      } else {
-        // Editing existing allergy
-        const updatedAllergies = [...allergies];
-        updatedAllergies[editIndex] = {
-          id: modalData.id,
-          allergen: selectedAllergen.allergen,
-        };
-        setAllergies(updatedAllergies);
-      }
-    } else if (modalType === "specialCondition") {
-      const selectedCondition = conditionOptions.find(
-        (opt) => opt.id === modalData.id
-      );
-      if (!selectedCondition) return;
-
-      if (editIndex === null) {
-        // Adding new condition
-        const exists = specialConditions.some(
-          (item) => item.id === modalData.id
-        );
-        if (!exists) {
-          setSpecialConditions((prev) => [
-            ...prev,
-            {
-              id: modalData.id,
-              condition: selectedCondition.condition,
-            },
-          
-          ],);
-         
-        }
-      } else {
-        // Editing existing condition
-        const updatedConditions = [...specialConditions];
-        updatedConditions[editIndex] = {
-          id: modalData.id,
-          condition: selectedCondition.condition,
-        };
-        setSpecialConditions(updatedConditions);
-      }
+    if (editIndex === null) {
+      // Add new condition
+      updatedConditions.push({
+        id: Date.now(), // Generate a unique ID for new condition
+        condition: modalData.name, // Directly save text from input
+      });
+    } else {
+      // Update existing condition
+      updatedConditions[editIndex].condition = modalData.name;
     }
 
-    handleCloseModal();
-    // console.log("Final Allergies List:", allergies);
-  };
+
+    setSpecialConditions(updatedConditions);
+  } else if (modalType === "allergy") {
+    const selectedAllergen = allergenList.find((opt) => opt.id === modalData.id);
+    if (!selectedAllergen) return;
+    const allergenExists = allergies.some(a => a.id === modalData.id);
+    if (allergenExists) {
+      handleCloseModal();
+      return;
+    }
+
+    const updatedAllergies = [...allergies];
+    if (editIndex === null) {
+      // Add new allergy
+      updatedAllergies.push({
+        id: modalData.id,
+        allergen: selectedAllergen.allergen,
+      });
+    } else {
+      // Update existing allergy
+      updatedAllergies[editIndex] = {
+        id: modalData.id,
+        allergen: selectedAllergen.allergen,
+      };
+    }
+
+    setAllergies(updatedAllergies);
+  }
+
+  handleCloseModal(); // Close modal after saving
+};
+
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -468,7 +447,7 @@ function ViewPets() {
             <div className="image-box position-relative">
               <Button
                 variant="primary"
-                className="position-absolute bottom-0 end-0 m-2"
+                className="bottom-0 m-2"
                 onClick={() => document.getElementById("imageUpload").click()}
               >
                 Upload Image
@@ -763,25 +742,26 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {specialConditions.map((condition, index) => (
-              <Col sm={4} key={index} className="mb-2">
-                <Badge
-                  bg="white"
-                  text="danger"
-                  className="p-2 w-100 d-inline-block text-center"
-                  style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
-                >
-                  {condition}
-                  <span
-                    onClick={() => handleShowModal("specialCondition", index)}
-                    className="ms-2 cursor-pointer"
-                  >
-                    <FaEdit />
-                  </span>
-                </Badge>
-              </Col>
-            ))}
-          </Row>
+  {specialConditions.map((condition, index) => (
+    <Col sm={4} key={condition.id} className="mb-2">
+      <Badge
+        bg="white"
+        text="danger"
+        className="p-2 w-100 d-inline-block text-center"
+        style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+      >
+        {condition.condition}
+        <span
+          onClick={() => handleShowModal("specialCondition", index)}
+          className="ms-2 cursor-pointer text-pink"
+        >
+          <FaEdit />
+        </span>
+      </Badge>
+    </Col>
+  ))}
+</Row>
+
 
           {/* Reminders */}
           <h5 className="mt-4">Reminders</h5>
@@ -1031,107 +1011,107 @@ function ViewPets() {
 
       {/* Modal for Adding/Editing Items */}
       <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editIndex !== null ? "Edit" : "Add"}{" "}
-            {modalType === "reminder"
-              ? "Reminder"
-              : modalType === "allergy"
-              ? "Allergy"
-              : "Condition"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            {modalType === "allergy" || modalType === "specialCondition" ? (
-              <Form.Group>
-                <Form.Label>
-                  Select {modalType === "allergy" ? "Allergen" : "Condition"}
-                </Form.Label>
-                <Form.Select
-                  value={modalData.id || ""}
-                  onChange={(e) => {
-                    const selected = e.target.value;
-                    const options =
-                      modalType === "allergy"
-                        ? allergenList
-                        : conditionOptions;
-                    const item = options.find(
-                      (opt) => opt.id === Number(selected)
-                    );
-                    if (item) {
-                      setModalData({
-                        ...modalData,
-                        id: item.id,
-                        name:
-                          modalType === "allergy"
-                            ? item.allergen
-                            : item.condition,
-                      });
-                    }
-                  }}
-                >
-                  <option value="">Select an option</option>
-                  {(modalType === "allergy"
-                    ? allergenList
-                    : conditionOptions
-                  ).map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {modalType === "allergy"
-                        ? option.allergen
-                        : option.condition}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            ) : (
-              <>
-                <Form.Group>
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={modalData.name}
-                    onChange={(e) =>
-                      setModalData({ ...modalData, name: e.target.value })
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={modalData.description}
-                    onChange={(e) =>
-                      setModalData({
-                        ...modalData,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={modalData.date}
-                    onChange={(e) =>
-                      setModalData({ ...modalData, date: e.target.value })
-                    }
-                  />
-                </Form.Group>
-              </>
-            )}
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSaveModal}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      {editIndex !== null ? "Edit" : "Add"}{" "}
+      {modalType === "specialCondition" 
+        ? "Special Condition" 
+        : modalType === "allergy"
+        ? "Allergy"
+        : "Reminder"}
+    </Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      {modalType === "specialCondition" ? (
+        <Form.Group>
+          <Form.Label>Condition</Form.Label>
+          <Form.Control
+            type="text"
+            value={modalData.name}
+            onChange={(e) =>
+              setModalData({ ...modalData, name: e.target.value })
+            }
+          />
+        </Form.Group>
+      ) : modalType === "allergy" ? (
+        <Form.Group>
+          <Form.Label>Select Allergen</Form.Label>
+          <Form.Select
+            value={modalData.id || ""}
+            onChange={(e) => {
+              const selected = e.target.value;
+              const item = allergenList.find(
+                (opt) => opt.id === Number(selected)
+              );
+              if (item) {
+                setModalData({
+                  ...modalData,
+                  id: item.id,
+                  name: item.allergen
+                });
+              }
+            }}
+          >
+            <option value="">Select an option</option>
+            {allergenList.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.allergen}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      ) : (
+        <>
+          <Form.Group>
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={modalData.name}
+              onChange={(e) =>
+                setModalData({ ...modalData, name: e.target.value })
+              }
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              type="text"
+              value={modalData.description}
+              onChange={(e) =>
+                setModalData({
+                  ...modalData,
+                  description: e.target.value,
+                })
+              }
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              type="date"
+              value={modalData.date}
+              onChange={(e) =>
+                setModalData({ ...modalData, date: e.target.value })
+              }
+            />
+          </Form.Group>
+        </>
+      )}
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      Close
+    </Button>
+    <Button variant="primary" onClick={handleSaveModal}>
+      Save
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+
+
 
       {/* Reschedule Modal */}
       <Modal
