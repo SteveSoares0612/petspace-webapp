@@ -28,12 +28,19 @@ import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
 import CustomModal from "../../components/CustomModal";
 
-
 function ViewPets() {
   // Retrieve pet id from the URL params
 
   const { id } = useParams();
-  const { user, updatePet, petDetails, getPetDetails, uploadPetImage, getAllergenList, allergenList } = useAuth();
+  const {
+    user,
+    updatePet,
+    petDetails,
+    getPetDetails,
+    uploadPetImage,
+    allergenList,
+    addPetAllergen,
+  } = useAuth();
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -49,8 +56,7 @@ function ViewPets() {
   const [attachments, setAttachments] = useState([]);
   const [selectedFile, setSelectedFile] = useState(previewImage);
 
-  const [allergens, setAllergens] = useState([]);
-  
+  const [allergenID, setAllergenID] = useState();
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
@@ -80,18 +86,40 @@ function ViewPets() {
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
       setPetType(petDetails.animal_type || "Unknown");
       setBio(petDetails.bio);
-      setSelectedFile(petDetails.pet_image == null ? previewImage : petDetails.pet_image)
+      setSelectedFile(
+        petDetails.pet_image == null ? previewImage : petDetails.pet_image
+      );
       // setSelectedFile(petDetails.pet_image)
 
-      console.log("Pet Image is ", petDetails)
-
+      console.log("Pet Image is ", petDetails);
     }
   }, [petDetails]);
 
+  const allergyOptions = [
+    { id: 1, allergen: "Peanuts" },
+    { id: 2, allergen: "Dairy" },
+    { id: 3, allergen: "Gluten" },
+    { id: 4, allergen: "Eggs" },
+    { id: 5, allergen: "Soy" },
+    { id: 6, allergen: "Fish" },
+    { id: 7, allergen: "Shellfish" },
+    { id: 8, allergen: "Tree Nuts" },
+  ];
+
+  const conditionOptions = [
+    { id: 1, condition: "Diabetes" },
+    { id: 2, condition: "Heart Disease" },
+    { id: 3, condition: "Arthritis" },
+    { id: 4, condition: "Kidney Disease" },
+    { id: 5, condition: "Thyroid Disorder" },
+    { id: 6, condition: "Anxiety" },
+    { id: 7, condition: "Skin Allergies" },
+    { id: 8, condition: "Hip Dysplasia" },
+  ];
+
   useEffect(() => {
-    if (allergenList ) {
-      setAllergens(allergenList);
-      console.log(allergens)
+    if (allergenList) {
+      console.log(allergenList);
     }
   }, [allergenList]);
 
@@ -132,22 +160,43 @@ function ViewPets() {
     ]);
   };
 
-  // Modal functions for adding/editing
   const handleShowModal = (type, index = null) => {
     setModalType(type);
-    setEditIndex(index); // Set the edit index to edit an existing entry
+    setEditIndex(index);
+
     if (index !== null) {
-      const dataArray = getDataArray(type); // Get the correct data array based on the type
-      setModalData({ ...dataArray[index] }); // Set modalData for editing
+      const dataArray = getDataArray(type);
+      const item = dataArray[index];
+      setModalData({
+        ...modalData,
+        id: item.id,
+        name:
+          type === "allergy"
+            ? item.allergen
+            : type === "specialCondition"
+            ? item.condition
+            : item.name,
+      });
     } else {
-      setModalData({ name: "", description: "", date: "" }); // Reset modalData for new entry
+      setModalData({
+        id: null,
+        name: "",
+        allergen: "",
+        condition: "",
+        description: "",
+        date: "",
+      });
     }
-    setShowModal(true); // Open the modal
+    setShowModal(true);
   };
 
   useEffect(() => {
-    console.log("Updated Allergies ", allergies)
-  }, [allergies])
+    if (allergies && allergenID) {
+      addPetAllergen(id, allergenID);
+      console.log("Updated Allergies: ", allergies);
+      console.log("Allergen ID: ", allergenID);
+    }
+  }, [allergies, allergenID]);
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -161,35 +210,78 @@ function ViewPets() {
     if (type === "reminder") return reminders;
   };
 
-  const setDataArray = (type, newArray) => {
-    if (type === "allergy") { setAllergies(newArray); }
-    if (type === "specialCondition") setSpecialConditions(newArray);
-    if (type === "reminder") setReminders(newArray);
-  };
+  // const setDataArray = (type, newArray) => {
+  //   if (type === "allergy") {
+  //     setAllergies(newArray);
+  //   }
+  //   if (type === "specialCondition") setSpecialConditions(newArray);
+  //   if (type === "reminder") setReminders(newArray);
+  // };
 
   const handleSaveModal = () => {
-   
-    const dataArray = getDataArray(modalType); // Get the correct array based on modal type
-    const newArray = [...dataArray];
+    if (!modalData.id) return; // Don't save if no option selected
 
-    if (modalType === "allergy" || modalType === "specialCondition") {
+    if (modalType === "allergy") {
+      const selectedAllergen = allergenList.find(
+        (opt) => opt.id === modalData.id
+      );
+      if (!selectedAllergen) return;
+
       if (editIndex === null) {
-        newArray.push(modalData.name); // Push name (string) only for allergies/conditions
-        console.log("Allergies = ", newArray); //ADD API CALL HERE
-      
+        // Adding new allergy
+        const exists = allergies.some((item) => item.id === modalData.id);
+        if (!exists) {
+          setAllergies((prev) => [
+            ...prev,
+            {
+              id: modalData.id,
+              allergen: selectedAllergen.allergen,
+            },
+          ]);
+          setAllergenID(modalData.id);
+        }
       } else {
-        newArray[editIndex] = modalData.name; // Update with the new name
+        // Editing existing allergy
+        const updatedAllergies = [...allergies];
+        updatedAllergies[editIndex] = {
+          id: modalData.id,
+          allergen: selectedAllergen.allergen,
+        };
+        setAllergies(updatedAllergies);
       }
-    } else if (modalType === "reminder") {
+    } else if (modalType === "specialCondition") {
+      const selectedCondition = conditionOptions.find(
+        (opt) => opt.id === modalData.id
+      );
+      if (!selectedCondition) return;
+
       if (editIndex === null) {
-        newArray.push(modalData); // Add entire reminder object
+        // Adding new condition
+        const exists = specialConditions.some(
+          (item) => item.id === modalData.id
+        );
+        if (!exists) {
+          setSpecialConditions((prev) => [
+            ...prev,
+            {
+              id: modalData.id,
+              condition: selectedCondition.condition,
+            },
+          ]);
+        }
       } else {
-        newArray[editIndex] = modalData; // Update reminder object
+        // Editing existing condition
+        const updatedConditions = [...specialConditions];
+        updatedConditions[editIndex] = {
+          id: modalData.id,
+          condition: selectedCondition.condition,
+        };
+        setSpecialConditions(updatedConditions);
       }
     }
 
-    setDataArray(modalType, newArray); // Update the state with the new array
-    handleCloseModal(); // Close the modal after saving
+    handleCloseModal();
+    // console.log("Final Allergies List:", allergies);
   };
 
   const handleSave = async () => {
@@ -214,9 +306,9 @@ function ViewPets() {
 
       await updatePet(formData);
       setModalMessage("Pet profile updated successfully!");
-      setShowConfirmModal(true)
+      setShowConfirmModal(true);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       alert("Failed to update pet profile", error);
     } finally {
       setIsLoading(false);
@@ -340,7 +432,6 @@ function ViewPets() {
     }
   };
 
-  
   return (
     <Container className="my-3">
       <Breadcrumb>
@@ -615,25 +706,35 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {allergies ? allergies.map((allergy, index) => (
-              <Col sm={4} key={index} className="mb-2">
-               <Badge
-                  bg="white" // White background
-                  text="danger" // Pink text (bootstrap's "danger" is pink)
-                  className="p-2 w-100 d-inline-block text-start"
-                  style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
-                >
-                  {allergy}
-                  <span
-                    onClick={() => handleShowModal("allergy", index)}
-                    className="ms-2 cursor-pointer text-pink"
+            {allergies.length === 0 ? (
+              <Col>
+                <p className="text-muted">No allergies added yet</p>
+              </Col>
+            ) : (
+              allergies.map((allergy) => (
+                <Col sm={4} key={allergy.id} className="mb-2">
+                  <Badge
+                    bg="white"
+                    text="danger"
+                    className="p-2 w-100 d-inline-block text-center"
+                    style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                   >
-                    <FaEdit />
-                  </span>
-                </Badge> 
-                
-              </Col> 
-            )): "" } 
+                    {allergy.allergen}
+                    <span
+                      onClick={() => {
+                        const index = allergies.findIndex(
+                          (a) => a.id === allergy.id
+                        );
+                        handleShowModal("allergy", index);
+                      }}
+                      className="ms-2 cursor-pointer text-pink"
+                    >
+                      <FaEdit />
+                    </span>
+                  </Badge>
+                </Col>
+              ))
+            )}
           </Row>
 
           {/* Special Conditions */}
@@ -918,23 +1019,66 @@ function ViewPets() {
         <Modal.Header closeButton>
           <Modal.Title>
             {editIndex !== null ? "Edit" : "Add"}{" "}
-            {modalType === "reminder" ? "Reminder" : "Item"}
+            {modalType === "reminder"
+              ? "Reminder"
+              : modalType === "allergy"
+              ? "Allergy"
+              : "Condition"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={modalData.name}
-                onChange={(e) =>
-                  setModalData({ ...modalData, name: e.target.value })
-                }
-              />
-            </Form.Group>
-            {modalType === "reminder" && (
+            {modalType === "allergy" || modalType === "specialCondition" ? (
+              <Form.Group>
+                <Form.Label>
+                  Select {modalType === "allergy" ? "Allergen" : "Condition"}
+                </Form.Label>
+                <Form.Select
+                  value={modalData.id || ""}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    const options =
+                      modalType === "allergy" ? allergenList : conditionOptions;
+                    const item = options.find(
+                      (opt) => opt.id === Number(selected)
+                    );
+                    if (item) {
+                      setModalData({
+                        ...modalData,
+                        id: item.id,
+                        name:
+                          modalType === "allergy"
+                            ? item.allergen
+                            : item.condition,
+                      });
+                    }
+                  }}
+                >
+                  <option value="">Select an option</option>
+                  {(modalType === "allergy"
+                    ? allergenList
+                    : conditionOptions
+                  ).map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {modalType === "allergy"
+                        ? option.allergen
+                        : option.condition}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            ) : (
               <>
+                <Form.Group>
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={modalData.name}
+                    onChange={(e) =>
+                      setModalData({ ...modalData, name: e.target.value })
+                    }
+                  />
+                </Form.Group>
                 <Form.Group>
                   <Form.Label>Description</Form.Label>
                   <Form.Control
@@ -1016,19 +1160,19 @@ function ViewPets() {
           </Button>
         </Modal.Footer>
       </Modal>
-{/* confirmation modal */}
+      {/* confirmation modal */}
       <CustomModal
-          show={showConfirmModal}
-          title="Success!"
-          message={modalMessage}
-          showCancel={false}
-          cancelText={"Close"}
-          variant="success"
-          onClose={() => setShowConfirmModal(false)}
-          onConfirm={() => setShowConfirmModal(false)}
-          showConfirm={true}
-          confirmText="Close"
-        />
+        show={showConfirmModal}
+        title="Success!"
+        message={modalMessage}
+        showCancel={false}
+        cancelText={"Close"}
+        variant="success"
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={() => setShowConfirmModal(false)}
+        showConfirm={true}
+        confirmText="Close"
+      />
     </Container>
   );
 }
