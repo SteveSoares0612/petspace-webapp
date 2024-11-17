@@ -23,16 +23,19 @@ import {
   FaEdit,
 } from "react-icons/fa";
 
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
-import { type } from "@testing-library/user-event/dist/type";
+import CustomModal from "../../components/CustomModal";
 
-function ViewPets() {
+
+function ViewPets(props) {
   // Retrieve pet id from the URL params
 
-  const { id } = useParams();
+  // const { id } = useParams();
   const { user, updatePet, petDetails, getPetDetails } = useAuth();
+  const location = useLocation();
+  const { id } = location.state || {};
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -46,9 +49,13 @@ function ViewPets() {
   const [bio, setBio] = useState(null);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(previewImage);
+  
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [modalData, setModalData] = useState({
@@ -59,7 +66,11 @@ function ViewPets() {
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
-    getPetDetails(id);
+    if(id){
+      console.log("Id is defined " , id)
+      getPetDetails(id);
+    }
+
   }, [id]);
 
   useEffect(() => {
@@ -73,7 +84,11 @@ function ViewPets() {
       setIsSpayedNeutered(petDetails.is_spayed_neutered);
       setPetType(petDetails.animal_type || "Unknown");
       setBio(petDetails.bio);
-      
+      setSelectedFile(petDetails.pet_image == null ? previewImage : petDetails.pet_image)
+      // setSelectedFile(petDetails.pet_image)
+
+      console.log("Pet Image is ", petDetails)
+
     }
   }, [petDetails]);
 
@@ -114,15 +129,13 @@ function ViewPets() {
     ]);
   };
 
- 
-
   // Modal functions for adding/editing
   const handleShowModal = (type, index = null) => {
     setModalType(type);
     setEditIndex(index); // Set the edit index to edit an existing entry
     if (index !== null) {
-      const dataArray = getDataArray(type); // Get the correct data array based on the type
-      setModalData({ ...dataArray[index] }); // Set modalData for editing
+      const dataArray = getDataArray(type); 
+      setModalData({ ...dataArray[index] }); 
     } else {
       setModalData({ name: "", description: "", date: "" }); // Reset modalData for new entry
     }
@@ -172,27 +185,33 @@ function ViewPets() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await updatePet({
-        pet_owner_id: user.id,
-        breed: petBreed,
-        animal_type: petType,
-        dob: dob,
-        color: color ? color : "null",
-        gender: gender,
-        name: petName,
-        id: id,
-        is_spayed_neutered: isSpayedNeutered,
-        is_microchipped: isMicrochipped,
-        pet_image: selectedFile,
-        bio:String(bio)
-      });
-      alert("Profile updated successfully!");
+      const formData = new FormData();
+      formData.append("pet_owner_id", user.id);
+      formData.append("breed", petBreed);
+      formData.append("animal_type", petType);
+      formData.append("dob", dob);
+      formData.append("color", color ? color : "null");
+      formData.append("gender", gender);
+      formData.append("name", petName);
+      formData.append("id", id);
+      formData.append("is_spayed_neutered", isSpayedNeutered);
+      formData.append("is_microchipped", isMicrochipped);
+      formData.append("bio", String(bio));
+
+      if (selectedFile) {
+        formData.append("image", selectedFile); // Appends the image file as is
+      }
+
+      await updatePet(formData);
+      setModalMessage("Pet profile updated successfully!");
+      setShowConfirmModal(true)
     } catch (error) {
-      alert("Failed to update profile");
+      console.log(error)
+      alert("Failed to update pet profile", error);
     } finally {
       setIsLoading(false);
       setIsEditing(false);
-      setIsEditingBio(false)
+      setIsEditingBio(false);
     }
   };
 
@@ -219,7 +238,7 @@ function ViewPets() {
       const newAttachment = {
         name: file.name,
         date: new Date().toLocaleDateString(), // Current date in 'MM/DD/YYYY' format
-        file: file, 
+        file: file,
       };
       setAttachments((prevAttachments) => [...prevAttachments, newAttachment]);
       setFile(null);
@@ -298,21 +317,32 @@ function ViewPets() {
     setAppointments(updatedAppointments);
   };
 
-  const [selectedFile, setSelectedFile] = useState(previewImage);
+  
 
-  // Image upload function with API call
+  // // Image upload function with API call
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setSelectedFile(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //     setSelectedFile(file); // Set the selected file for the upload
+  //     handleSave();
+  //   }
+  // };
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setSelectedFile(file); // Set the selected file for the upload
-      handleSave()
+      setSelectedFile(file);  // Store the raw file, no need for FileReader or base64 encoding
+      handleSave();  // You can call the save function here
     }
   };
+
+  if (!id) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Container className="my-5">
@@ -566,7 +596,7 @@ function ViewPets() {
           <h4 className="text-danger mt-4">History & Health</h4>
           <h5 className="mt-3">Vet Summary</h5>
           <p>
-          Poppy is a healthy and active 4-year-old Golden Retriever. She has
+            Poppy is a healthy and active 4-year-old Golden Retriever. She has
             no significant health conditions but has a mild allergy to chicken,
             which her owner manages by ensuring her diet is free from
             chicken-based products. Regular vet check-ups confirm she is up to
@@ -591,8 +621,8 @@ function ViewPets() {
             {allergies.map((allergy, index) => (
               <Col sm={4} key={index} className="mb-2">
                 <Badge
-                  bg="white" // White background
-                  text="danger" // Pink text (bootstrap's "danger" is pink)
+                  bg="white" 
+                  text="danger" 
                   className="p-2 w-100 d-inline-block text-start"
                   style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                 >
@@ -988,6 +1018,19 @@ function ViewPets() {
           </Button>
         </Modal.Footer>
       </Modal>
+{/* confirmation modal */}
+      <CustomModal
+          show={showConfirmModal}
+          title="Success!"
+          message={modalMessage}
+          showCancel={false}
+          cancelText={"Close"}
+          variant="success"
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={() => setShowConfirmModal(false)}
+          showConfirm={true}
+          confirmText="Close"
+        />
     </Container>
   );
 }
