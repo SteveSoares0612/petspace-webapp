@@ -39,7 +39,9 @@ function ViewPets() {
     getPetDetails,
     uploadPetImage,
     allergenList,
-    addPetAllergen,  } = useAuth();
+    addPetAllergen,  
+    getPetAllergens,
+    petAllergies,} = useAuth();
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -72,10 +74,23 @@ function ViewPets() {
     date: ""
   });
   const [editIndex, setEditIndex] = useState(null);
+  const [allergies, setAllergies] = useState([]);
+  const [specialConditions, setSpecialConditions] = useState([
+    "Anemia",
+    "Fleas",
+  ]);
 
   useEffect(() => {
     getPetDetails(id);
+    getPetAllergens(id);
   }, [id]);
+
+  useEffect(() => {
+    if (petAllergies) {
+      setAllergies(petAllergies);
+    }
+  }, [petAllergies]);
+ 
 
   useEffect(() => {
     if (petDetails) {
@@ -126,11 +141,7 @@ function ViewPets() {
   }, [allergenList]);
 
   // Initial data as JSON arrays
-  const [allergies, setAllergies] = useState([]);
-  const [specialConditions, setSpecialConditions] = useState([
-  
-  ]);
-
+ 
   const [reminders, setReminders] = useState([
     {
       name: "Aspirin",
