@@ -331,11 +331,7 @@ const ManagePets = () => {
 
                                     <div className="d-flex justify-content-between align-items-center mt-3">
                                       <Link
-                                       to={{
-                                        pathname: "/viewpets",
-                                      }}
-                                      state={{ id: pet.id }}
-                                      onClick={()=> console.log(pet.id)}
+                                        to={`/viewpets/${pet.id}`}
                                         className="view-btn"
                                       >
                                         View
@@ -404,10 +400,8 @@ const ManagePets = () => {
                                     {/* Buttons Section (View and Delete on same line, opposite ends) */}
                                     <div className="d-flex justify-content-between align-items-center mt-3">
                                       <Link
-                                        to={{
-                                          pathname: "/viewpets",
-                                          state: { petId: pet.id }, 
-                                        }}
+                                        to={`/viewpets/${pet.id}`}
+                                        // component={ViewPets}
                                         className="view-btn"
                                       >
                                         View

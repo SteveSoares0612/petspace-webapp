@@ -36,7 +36,7 @@ const AppRoutes = () => {
             <Route path="/signin" element={<SignIn />} /> 
             <Route path="/signup" element={<SignUp />} />
             <Route path="/managepets" element={<ManagePets />} />
-            <Route path="/viewpets" element={<ViewPets />} />
+            <Route path="/viewpets/:id" element={<ViewPets />} />
           </Routes>
         </Col>
       </Row>

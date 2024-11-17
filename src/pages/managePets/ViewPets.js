@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Redirect } from "react";
 import {
   Container,
   Row,
@@ -23,19 +23,17 @@ import {
   FaEdit,
 } from "react-icons/fa";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
 import CustomModal from "../../components/CustomModal";
 
 
-function ViewPets(props) {
+function ViewPets() {
   // Retrieve pet id from the URL params
 
-  // const { id } = useParams();
+  const { id } = useParams();
   const { user, updatePet, petDetails, getPetDetails } = useAuth();
-  const location = useLocation();
-  const { id } = location.state || {};
 
   const [petName, setPetname] = useState();
   const [dob, setDob] = useState("Unknown");
@@ -66,11 +64,7 @@ function ViewPets(props) {
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
-    if(id){
-      console.log("Id is defined " , id)
-      getPetDetails(id);
-    }
-
+    getPetDetails(id);
   }, [id]);
 
   useEffect(() => {
@@ -134,8 +128,8 @@ function ViewPets(props) {
     setModalType(type);
     setEditIndex(index); // Set the edit index to edit an existing entry
     if (index !== null) {
-      const dataArray = getDataArray(type); 
-      setModalData({ ...dataArray[index] }); 
+      const dataArray = getDataArray(type); // Get the correct data array based on the type
+      setModalData({ ...dataArray[index] }); // Set modalData for editing
     } else {
       setModalData({ name: "", description: "", date: "" }); // Reset modalData for new entry
     }
@@ -340,10 +334,7 @@ function ViewPets(props) {
     }
   };
 
-  if (!id) {
-    return <div>Loading...</div>;
-  }
-
+  
   return (
     <Container className="my-5">
       <Breadcrumb>
@@ -621,8 +612,8 @@ function ViewPets(props) {
             {allergies.map((allergy, index) => (
               <Col sm={4} key={index} className="mb-2">
                 <Badge
-                  bg="white" 
-                  text="danger" 
+                  bg="white" // White background
+                  text="danger" // Pink text (bootstrap's "danger" is pink)
                   className="p-2 w-100 d-inline-block text-start"
                   style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                 >
