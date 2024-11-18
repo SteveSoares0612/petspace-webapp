@@ -21,6 +21,7 @@ import {
   FaPlus,
   FaUpload,
   FaEdit,
+  FaTrash,
 } from "react-icons/fa";
 
 import { Link, useParams } from "react-router-dom";
@@ -45,6 +46,8 @@ function ViewPets() {
     addPetSpecCondition,
     getSpecConditionList,
     specialConditionList,
+    deletePetAllergen,
+    deletePetSpecCondition,
   } = useAuth();
 
   const [petName, setPetname] = useState();
@@ -185,8 +188,6 @@ function ViewPets() {
   useEffect(() => {
     if (allergies && allergenID) {
       addPetAllergen(id, allergenID);
-      console.log("Updated Allergies: ", allergies);
-      console.log("Allergen ID: ", allergenID);
     }
     if (specialCondition) {
       addPetSpecCondition(id, specialCondition, "");
@@ -239,18 +240,22 @@ function ViewPets() {
           allergen: selectedAllergen.allergen,
         });
         setAllergenID(modalData.id);
-      } else {
-        // Update existing allergy
-        updatedAllergies[editIndex] = {
-          id: modalData.id,
-          allergen: selectedAllergen.allergen,
-        };
-      }
-
+      } 
       setAllergies(updatedAllergies);
     }
+   
+    handleCloseModal();
+  };
 
-    handleCloseModal(); // Close modal after saving
+  const handleDeleteAllergy = (allergyId) => {
+
+    deletePetAllergen(id, allergyId);
+   
+    console.log("Deleted allergy ID:", allergyId); // Log or handle the deleted ID
+  };
+
+  const handleDeleteCondition = (conditionId) => {
+    deletePetSpecCondition(id, conditionId);
   };
 
   const handleSave = async () => {
@@ -265,7 +270,10 @@ function ViewPets() {
       formData.append("gender", gender);
       formData.append("name", petName);
       formData.append("id", id);
-      formData.append("is_spayed_neutered", isSpayedNeutered ? isSpayedNeutered : "0");
+      formData.append(
+        "is_spayed_neutered",
+        isSpayedNeutered ? isSpayedNeutered : "0"
+      );
       formData.append("is_microchipped", isMicrochipped ? isMicrochipped : "0");
       formData.append("bio", String(bio));
 
@@ -646,20 +654,6 @@ function ViewPets() {
         </Tab>
 
         <Tab eventKey="history" title="History">
-          {/* <h4 className="text-danger mt-4">History & Health</h4>
-          <h5 className="mt-3">Vet Summary</h5>
-          <p>
-            Poppy is a healthy and active 4-year-old Golden Retriever. She has
-            no significant health conditions but has a mild allergy to chicken,
-            which her owner manages by ensuring her diet is free from
-            chicken-based products. Regular vet check-ups confirm she is up to
-            date on vaccinations and has no known chronic illnesses. Poppy
-            maintains a healthy weight through a balanced diet and regular
-            exercise, including daily walks and playtime. While she is generally
-            healthy, she may experience anxiety during thunderstorms, which her
-            owner addresses with comforting techniques and safe spaces.
-          </p> */}
-
           {/* Allergies */}
           <h5>Allergies</h5>
 
@@ -681,21 +675,24 @@ function ViewPets() {
                   <Badge
                     bg="white"
                     text="danger"
-                    className="p-2 w-100 d-inline-block text-center"
+                    className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center"
                     style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                   >
-                    {allergy.allergen}
-                    <span
-                      onClick={() => {
-                        const index = allergies.findIndex(
-                          (a) => a.id === allergy.id
-                        );
-                        handleShowModal("allergy", index);
-                      }}
-                      className="ms-2 cursor-pointer text-pink"
-                    >
-                      <FaEdit />
+                    {/* Allergy text */}
+                    <span className="flex-grow-1 text-start">
+                      {allergy.allergen}
                     </span>
+
+                    {/* Edit and Delete icons */}
+                    <div className="d-flex">
+                      {/* Delete icon */}
+                      <span
+                         onClick={() => handleDeleteAllergy(allergy.allergen_id)}
+                        className="ms-2 cursor-pointer text-danger"
+                      >
+                        <FaTrash  style={{cursor:"pointer"}} />
+                      </span>
+                    </div>
                   </Badge>
                 </Col>
               ))
@@ -718,16 +715,28 @@ function ViewPets() {
                 <Badge
                   bg="white"
                   text="danger"
-                  className="p-2 w-100 d-inline-block text-center"
+                  className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center"
                   style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
                 >
-                  {condition.condition_name}
-                  <span
-                    onClick={() => handleShowModal("specialCondition", index)}
-                    className="ms-2 cursor-pointer text-pink"
-                  >
-                    <FaEdit />
+                  <span className="flex-grow-1 text-start">
+                    {condition.condition_name}
                   </span>
+
+                  {/* Edit and Delete icons */}
+                  <div className="d-flex">
+                    <span
+                      onClick={() => handleShowModal("specialCondition", index)}
+                      className="ms-2 cursor-pointer text-pink"
+                    >
+                      <FaEdit style={{cursor:"pointer"}} />
+                    </span>
+                    <span
+                       onClick={() => handleDeleteCondition(condition.id)}
+                      className="ms-2 cursor-pointer text-danger"
+                    >
+                      <FaTrash  style={{cursor:"pointer"}} />
+                    </span>
+                  </div>
                 </Badge>
               </Col>
             ))}
