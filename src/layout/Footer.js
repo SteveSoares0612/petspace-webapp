@@ -15,9 +15,7 @@ function Footer() {
             <h5 className="mb-3 ms-3">Quick Links</h5>
             <Nav className="flex-column">
               <Nav.Link as={Link} to="/home">Home</Nav.Link>
-              <Nav.Link as={Link} to="/events">Events</Nav.Link>
-              <Nav.Link as={Link} to="/health">My Health</Nav.Link>
-             
+              <Nav.Link as={Link} to="/events">Events</Nav.Link>             
             </Nav>
           </Col>
 

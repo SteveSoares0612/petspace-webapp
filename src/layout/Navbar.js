@@ -41,10 +41,6 @@ function AppNavbar() {
             <Nav.Link as={Link} to="/events">
               Events
             </Nav.Link>
-            <Nav.Link as={Link} to="/health">
-              Health
-            </Nav.Link>
-            
           </Nav>
 
           {/* Authentication Links on the right as Dropdown */}

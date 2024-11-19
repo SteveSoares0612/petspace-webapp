@@ -25,6 +25,8 @@ export const AuthProvider = ({ children }) => {
   const [petAllergies, setPetAllergies] = useState([]);
   const [specialConditionList, setSpecialConditionList] = useState([]);
   const [petDetails, setPetDetails] = useState(null);
+  const [attachments, setAttachments] = useState([]);
+
 
   const BASE_URL = "http://localhost:8000";
 
@@ -1207,6 +1209,142 @@ export const AuthProvider = ({ children }) => {
       }
     }
   };
+
+  const reschedulePetAppointment = async (petId, appointmentId, new_schedule_id, old_schedule_id ) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/${petId}/appointment/cancel/${appointmentId}`,
+       {new_schedule_id, old_schedule_id},
+        {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        return response.data
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+
+  const uploadPetRecord = async (petId, file) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append("pet_id", petId);
+      formData.append("filename", file.name);
+      formData.append("document", file);
+      formData.append("date_added", new Date().toISOString());
+  
+      const response = await axios.post(
+        `${BASE_URL}/web/pet-record/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-XSRF-TOKEN": decodeURIComponent(token),
+          },
+          withCredentials: true,
+        }
+      );
+  
+      if (response.status === 201) {
+        return response.data; // Return the response data (e.g., file link)
+      } else {
+        throw new Error("Failed to upload file");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload();
+        } else {
+          console.error("Error uploading file:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+
+  const getPetRecords = async (petId) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.error("CSRF token not found in cookies");
+        return [];
+      }
+  
+      const response = await axios.get(`${BASE_URL}/web/pet-record/list/${petId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        return response.data.list || []; // Ensure proper data handling
+      } else {
+        throw new Error("Failed to fetch pet records");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload();
+        } else {
+          console.error("Error fetching pet records:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+      return [];
+    }
+  };
+  
+
   useEffect(() => {
     setAuthError(null);
     const storedUser = localStorage.getItem("user");
@@ -1266,8 +1404,11 @@ export const AuthProvider = ({ children }) => {
     fetchVetSchedule,
     bookAppointment,
     getPetAppointments,
-    deletePetAppointment
-   
+    deletePetAppointment,
+    reschedulePetAppointment,
+    uploadPetRecord,
+    attachments,
+    getPetRecords
   };
 
   return (

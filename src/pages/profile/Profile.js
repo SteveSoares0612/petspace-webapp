@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button, Form, Spinner,Card } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Form,
+  Spinner,
+  Card,
+} from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { FiEdit } from "react-icons/fi";
 
@@ -46,8 +54,9 @@ function Profile() {
     { value: "YT", label: "Yukon" },
   ];
 
-  const [imagePreview, setImagePreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(
+    user.profile_image == null ? previewImage : user.profile_image
+  );
 
   // Image upload function with API call
   const handleImageChange = (e) => {
@@ -55,7 +64,7 @@ function Profile() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setSelectedFile(reader.result);
       };
       reader.readAsDataURL(file);
       setSelectedFile(file); // Set the selected file for the upload
@@ -93,10 +102,15 @@ function Profile() {
   return (
     <Container className="p-4">
       {/* Profile Info Section */}
-      
+
       <Row className="mb-4">
         <Col md={4}>
-          <Card.Img variant="top"  src={user.profile_image ? user.profile_image : imagePreview} alt="Profile Image" rounded />
+          <Card.Img
+            variant="top"
+            src={selectedFile}
+            alt="Pet Image"
+            rounded="true"
+          />
           <div className="image-upload-container text-center">
             <div className="image-box position-relative">
               <Button
@@ -117,12 +131,14 @@ function Profile() {
           </div>
         </Col>
         <Col md={8}>
-          <h2>{user.first_name} {user.last_name}</h2>
-          <p>Address: {user.address &&`${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`}</p>
-          {/* <p>Born: April 16, 2024</p>
-          <p>Owner: Leslie Lexington</p>
-          <p>Weight: 55 lbs</p>
-          <p>Color: Ash Grey</p> */}
+          <h2>
+            {user.first_name} {user.last_name}
+          </h2>
+          <p>
+            {user.address && user.address.street_name
+              ? `Address: ${user.address.street_name}, ${user.address.city}, ${user.address.province}, ${user.address.postal_code}, ${user.address.country}`
+              : "No address information available."}
+          </p>{" "}
           <a href="#" className="view-btn">{`${petsOwned} Pets`}</a>
           <Button variant="secondary" href="/managepets">
             Manage Pets

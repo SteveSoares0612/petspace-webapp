@@ -33,7 +33,6 @@ const AppRoutes = () => {
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
             <Route path="/profile" element={isAuthenticated ? <Profile /> : <SignIn />} />
             <Route path="/family" element={isAuthenticated ? <Family /> : <SignIn />} />
-            <Route path="/health" element={isAuthenticated ? <Health /> : <SignIn />} />
             <Route path="/managepets" element={isAuthenticated ? <ManagePets /> : <SignIn />} />
             <Route path="/viewpets/:id" element={isAuthenticated ? <ViewPets /> : <SignIn />} />
             <Route path="*" element={isAuthenticated ? <NotFound /> : <SignIn />} /> {/* Catch-all */}
