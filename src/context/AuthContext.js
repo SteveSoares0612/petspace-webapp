@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       // Send the login request using Axios
@@ -107,8 +107,8 @@ export const AuthProvider = ({ children }) => {
       } else {
         setAuthError("An unexpected error occurred: " + error.message);
       }
-      setIsAuthenticated(false); // Set authentication state to false
-      return false; // Return false for failed login
+      setIsAuthenticated(false); 
+      return false; 
     }
   };
 
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       // Step 2: Send the login request using Axios
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -212,7 +212,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -250,7 +250,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(
@@ -293,7 +293,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -342,7 +342,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.delete(
@@ -389,7 +389,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -437,7 +437,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(`${BASE_URL}/web/pet/pet-list`, {
@@ -478,7 +478,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.delete(
@@ -521,7 +521,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(
@@ -561,7 +561,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const formData = new FormData();
@@ -608,7 +608,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const formData = new FormData();
@@ -650,7 +650,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -696,7 +696,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(
@@ -740,7 +740,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(
@@ -782,7 +782,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -831,7 +831,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
   
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
   
       const response = await axios.delete(
@@ -875,7 +875,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.post(
@@ -920,7 +920,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.get(
@@ -962,7 +962,7 @@ export const AuthProvider = ({ children }) => {
         ?.split("=")[1];
 
       if (!token) {
-        throw new Error("CSRF token not found in cookies");
+        console.log("CSRF token not found in cookies");
       }
 
       const response = await axios.delete(
@@ -996,7 +996,217 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getVets = async (petId) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.get(`${BASE_URL}/web/pet/${petId}/appointment/veterinarians`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        const vets = response.data.map((vet) => ({
+          id: vet.id,
+          fullName: `${vet.professional_title} ${vet.first_name} ${vet.last_name}`,
+        }));
+        console.log("Vets List: ", vets);
+        return vets; // Return the processed vets list
+      } else {
+        throw new Error("Failed to fetch veterinarians");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
 
+  const fetchVetSchedule = async (petId, vetId) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.get(`${BASE_URL}/web/pet/${petId}/appointment/vet-schedule/${vetId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        throw new Error("Failed to fetch veterinarians");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+
+  const bookAppointment = async (petId, schedule_id, notes) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.post(`${BASE_URL}/web/pet/${petId}/appointment/create-appointment`, 
+        {notes,schedule_id,},
+        {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        window.location.reload()
+        return response.data;
+      } else {
+        throw new Error("Failed to fetch veterinarians");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+  
+  const getPetAppointments = async (petId, vetId) => {
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.get(`${BASE_URL}/web/pet/${petId}/appointment/list`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        return response.data.list; 
+      } else {
+        throw new Error("Failed to fetch veterinarians");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+
+  const deletePetAppointment = async (petId, appointmentId) => {
+    console.log("awffefefwefaedfe",appointmentId)
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+  
+      if (!token) {
+        console.log("CSRF token not found in cookies");
+        return;
+      }
+  
+      const response = await axios.post(
+        `${BASE_URL}/web/pet/${petId}/appointment/cancel/${appointmentId}`,
+       {},
+        {
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": decodeURIComponent(token),
+        },
+        withCredentials: true,
+      });
+  
+      if (response.status === 200) {
+        return response.data
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.message.includes("CSRF token")) {
+          console.warn("Session expired or CSRF token missing, redirecting to login.");
+          setIsAuthenticated(false);
+          window.location.reload()
+        } else {
+          console.error("Error fetching veterinarians:", error);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
   useEffect(() => {
     setAuthError(null);
     const storedUser = localStorage.getItem("user");
@@ -1052,6 +1262,11 @@ export const AuthProvider = ({ children }) => {
     getSpecConditionList,
     specialConditionList,
     deletePetSpecCondition,
+    getVets,
+    fetchVetSchedule,
+    bookAppointment,
+    getPetAppointments,
+    deletePetAppointment
    
   };
 

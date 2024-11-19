@@ -28,6 +28,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import previewImage from "../../assets/images/previewImage.jpg";
 import CustomModal from "../../components/CustomModal";
+import "./ManagePets.css";
 
 function ViewPets() {
   // Retrieve pet id from the URL params
@@ -48,6 +49,11 @@ function ViewPets() {
     specialConditionList,
     deletePetAllergen,
     deletePetSpecCondition,
+    getVets,
+    fetchVetSchedule,
+    bookAppointment,
+    getPetAppointments,
+    deletePetAppointment,
   } = useAuth();
 
   const [petName, setPetname] = useState();
@@ -83,11 +89,45 @@ function ViewPets() {
   const [specialConditions, setSpecialConditions] = useState([]);
   const [allergenID, setAllergenID] = useState();
   const [specialCondition, setSpecialCondition] = useState();
+  const [vets, setVets] = useState();
+  const [vetSchedule, setVetSchedule] = useState([]);
+  const [selectedVet, setSelectedVet] = useState(null);
+  const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  // New state for reschedule modal
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleIndex, setRescheduleIndex] = useState(null);
+  const [rescheduleData, setRescheduleData] = useState({ date: "", time: "" });
 
   useEffect(() => {
-    getPetDetails(id);
-    getPetAllergens(id);
-    getSpecConditionList(id);
+    const fetchData = async () => {
+      try {
+        await getPetDetails(id);
+        await getPetAllergens(id);
+        await getSpecConditionList(id);
+        // await getPetAppointments(id);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const appointmentsList = await getPetAppointments(id);
+        console.log("Fetched Appointments:", appointmentsList);
+        setAppointments(appointmentsList || []);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   useEffect(() => {
@@ -122,8 +162,6 @@ function ViewPets() {
     }
   }, [allergenList]);
 
-  // Initial data as JSON arrays
-
   const [reminders, setReminders] = useState([
     {
       name: "Aspirin",
@@ -133,20 +171,7 @@ function ViewPets() {
     { name: "Walk", description: "1 hour", date: "Everyday, 22:00" },
     { name: "Brush", description: "1 hour", date: "Everyday, 22:00" },
   ]);
-  const [appointments, setAppointments] = useState([
-    {
-      doctor: "Dr. Salih Ahmet",
-      date: "14.02.2024 - 13:00",
-      location: "Binevler Mahallesi",
-      reason: "flea removal",
-    },
-    {
-      doctor: "Dr. Salih Ahmet",
-      date: "24.01.2025 - 10:00",
-      location: "12 Merchant Ave, Waterloo",
-      reason: "tooth removal",
-    },
-  ]);
+  const [appointments, setAppointments] = useState([]);
 
   const addAppointment = (newAppointment) => {
     setAppointments((prevAppointments) => [
@@ -240,24 +265,35 @@ function ViewPets() {
           allergen: selectedAllergen.allergen,
         });
         setAllergenID(modalData.id);
-      } 
+      }
       setAllergies(updatedAllergies);
     }
-   
+
     handleCloseModal();
   };
 
   const handleDeleteAllergy = (allergyId) => {
-
     deletePetAllergen(id, allergyId);
-   
-    console.log("Deleted allergy ID:", allergyId); // Log or handle the deleted ID
   };
 
   const handleDeleteCondition = (conditionId) => {
     deletePetSpecCondition(id, conditionId);
   };
 
+  const handleDeleteAppointment = async (appointmentID) => {
+    try { 
+      await deletePetAppointment(id, appointmentID);
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appointment) => appointment.id !== appointmentID)
+      );
+      console.log(`Appointment with ID ${appointmentID} deleted successfully.`);
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      setModalMessage("Failed to delete the appointment. Please try again.");
+      setShowErrorModal(true);
+    }
+  };
+  
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -320,11 +356,6 @@ function ViewPets() {
     }
   };
 
-  const vets = [
-    { name: "Dr. Salih Ahmet", address: "Binevler Mahallesi" },
-    { name: "Dr. Mohammed Ismai", address: "12 Merchant Ave, Waterloo" },
-  ];
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAppointmentDetails((prevDetails) => ({
@@ -340,32 +371,6 @@ function ViewPets() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    addAppointment({
-      doctor: appointmentDetails.vet,
-      date: `${appointmentDetails.date} - ${appointmentDetails.time}`,
-      reason: appointmentDetails.reason,
-      location: appointmentDetails.address,
-    });
-    setAppointmentDetails({
-      reason: "",
-      date: "",
-      time: "",
-      vet: "",
-      address: "",
-    });
-    setShowForm(false); // Hide form after submit
-  };
-
-  // Define showForm and setShowForm state
-  const [showForm, setShowForm] = useState(false);
-
-  // New state for reschedule modal
-  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
-  const [rescheduleIndex, setRescheduleIndex] = useState(null);
-  const [rescheduleData, setRescheduleData] = useState({ date: "", time: "" });
-
   // Function to handle rescheduling
   const handleReschedule = (index) => {
     setRescheduleIndex(index);
@@ -375,21 +380,16 @@ function ViewPets() {
     setShowRescheduleModal(true);
   };
 
-  // Function to save rescheduled appointment
-  const saveRescheduledAppointment = () => {
-    const updatedAppointments = [...appointments];
-    updatedAppointments[rescheduleIndex] = {
-      ...updatedAppointments[rescheduleIndex],
-      date: `${rescheduleData.date} - ${rescheduleData.time}`,
-    };
-    setAppointments(updatedAppointments);
-    setShowRescheduleModal(false);
-  };
+  const formatTime = (time) => {
+    const [hours, minutes] = time.split(":");
+    const date = new Date();
+    date.setHours(hours, minutes);
 
-  // Function to cancel appointment
-  const cancelAppointment = (index) => {
-    const updatedAppointments = appointments.filter((_, i) => i !== index);
-    setAppointments(updatedAppointments);
+    return date.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true, // Convert to AM/PM format
+    });
   };
 
   const handleImageChange = (e) => {
@@ -404,6 +404,74 @@ function ViewPets() {
       uploadPetImage(file, id); // Call the upload function
     }
   };
+
+  const handleOpenForm = async (petId) => {
+    const vetsList = await getVets(petId);
+    setVets(vetsList || []);
+    setShowForm(true);
+  };
+
+  const handleVetChange = async (e) => {
+    const vetId = e.target.value;
+    setSelectedVet(vetId);
+    setAppointmentDetails((prev) => ({ ...prev, vet: vetId }));
+
+    if (vetId) {
+      try {
+        const schedule = await fetchVetSchedule(id, vetId); // Call the context function
+        setVetSchedule(schedule); // Update state with fetched schedule
+      } catch (error) {
+        console.error("Failed to fetch vet schedule", error);
+      }
+    }
+  };
+
+  const handleCardSelect = (scheduleId) => {
+    setSelectedScheduleId(scheduleId);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (!selectedScheduleId) {
+      setShowErrorModal(true);
+      return;
+    }
+  
+    try {
+      const newAppointment = await bookAppointment(
+        id,
+        selectedScheduleId,
+        appointmentDetails.reason
+      );
+  
+      // Log the new appointment to verify its structure
+      console.log("New Appointment:", newAppointment);
+  
+      // Dynamically add the new appointment to the state
+      setAppointments((prevAppointments) => [...prevAppointments, newAppointment]);
+  
+      // Reset the form and close it
+      setAppointmentDetails({
+        reason: "",
+        date: "",
+        time: "",
+        vet: "",
+        address: "",
+      });
+      setSelectedScheduleId(null);
+      setShowForm(false);
+  
+      setModalMessage("Appointment booked successfully!");
+      setShowConfirmModal(true);
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      setModalMessage("Failed to book the appointment. Please try again.");
+      setShowErrorModal(true);
+    }
+  };
+  
+  
 
   return (
     <Container className="my-3">
@@ -609,9 +677,9 @@ function ViewPets() {
           )}
           {/* overview appointment */}
           <Row className="mt-3 g-3">
-            {" "}
-            {/* g-3 adds controlled spacing between cards */}
-            {appointments.map((appointment, index) => (
+          
+          <h5 className="mb-0">Upcoming Appointments</h5>
+            {appointments.filter((appointment) => appointment.status === "confirmed").map((appointment, index) => (
               <Col md={6} key={index}>
                 <Card
                   className="rounded-3"
@@ -624,17 +692,17 @@ function ViewPets() {
                   <Card.Body>
                     {/* Title */}
                     <Card.Title className="text-dark">
-                      {appointment.doctor}
+                      {`${appointment.provider_first_name} ${appointment.provider_last_name}`}
                     </Card.Title>
 
                     {/* Appointment details */}
                     <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                      <FaNotesMedical /> {appointment.reason}
+                      <FaNotesMedical /> {appointment.notes}
                     </p>
                     <Row className="g-2">
                       <Col xs={6}>
                         <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                          <FaCalendar /> {appointment.date}
+                          <FaCalendar /> {appointment.schedule_date}
                         </p>
                       </Col>
                       <Col xs={6}>
@@ -687,10 +755,10 @@ function ViewPets() {
                     <div className="d-flex">
                       {/* Delete icon */}
                       <span
-                         onClick={() => handleDeleteAllergy(allergy.allergen_id)}
+                        onClick={() => handleDeleteAllergy(allergy.allergen_id)}
                         className="ms-2 cursor-pointer text-danger"
                       >
-                        <FaTrash  style={{cursor:"pointer"}} />
+                        <FaTrash style={{ cursor: "pointer" }} />
                       </span>
                     </div>
                   </Badge>
@@ -710,7 +778,7 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {specialConditions.map((condition, index) => (
+            {specialConditions.length === 0 ? specialConditions.map((condition, index) => (
               <Col sm={4} key={condition.id} className="mb-2">
                 <Badge
                   bg="white"
@@ -728,47 +796,23 @@ function ViewPets() {
                       onClick={() => handleShowModal("specialCondition", index)}
                       className="ms-2 cursor-pointer text-pink"
                     >
-                      <FaEdit style={{cursor:"pointer"}} />
+                      <FaEdit style={{ cursor: "pointer" }} />
                     </span>
                     <span
-                       onClick={() => handleDeleteCondition(condition.id)}
+                      onClick={() => handleDeleteCondition(condition.id)}
                       className="ms-2 cursor-pointer text-danger"
                     >
-                      <FaTrash  style={{cursor:"pointer"}} />
+                      <FaTrash style={{ cursor: "pointer" }} />
                     </span>
                   </div>
                 </Badge>
               </Col>
-            ))}
+            )) :  <Col>
+            <p className="text-muted">No special conditions added yet</p>
+          </Col>}
           </Row>
 
-          {/* Reminders */}
-          <h5 className="mt-4">Reminders</h5>
-          <Button
-            variant="outline-danger"
-            onClick={() => handleShowModal("reminder")}
-          >
-            <FaPlus /> Add Reminder
-          </Button>
-          <Row className="mt-3">
-            {reminders.map((reminder, index) => (
-              <Col md={4} key={index}>
-                <Card className="mb-3">
-                  <Card.Body>
-                    <Card.Title>{reminder.name}</Card.Title>
-                    <p>{reminder.description}</p>
-                    <FaCalendar /> {reminder.date}
-                    <span
-                      onClick={() => handleShowModal("reminder", index)}
-                      className="ms-2 cursor-pointer"
-                    >
-                      <FaEdit />
-                    </span>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          
 
           {/* Attachments */}
           <h5 className="mt-4">Records</h5>
@@ -816,9 +860,21 @@ function ViewPets() {
         </Tab>
         <Tab eventKey="appointments" title="Appointments">
           <div className="d-flex justify-content-between align-items-center mt-4">
-            <h5 className="mb-0">Upcoming Appointments</h5>
-            <Button variant="primary" onClick={() => setShowForm(true)}>
-              Book Appointment
+            <h5 className="mb-0">
+              {" "}
+              {showForm ? "Book Appointment" : "Upcoming Appointments"}{" "}
+            </h5>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (!showForm) {
+                  handleOpenForm(id);
+                } else {
+                  setShowForm(false);
+                }
+              }}
+            >
+              {showForm ? "Cancel" : "Book Appointment"}{" "}
             </Button>
           </div>
 
@@ -834,41 +890,19 @@ function ViewPets() {
                   Reason for Appointment
                 </Form.Label>
                 <Form.Control
-                  type="text"
-                  placeholder="Enter reason for appointment"
+                  as="select"
                   name="reason"
                   value={appointmentDetails.reason}
                   onChange={handleChange}
                   required
-                />
+                >
+                  <option value="">Select a reason</option>
+                  <option value="My pet is sick">My pet is sick</option>
+                  <option value="Physical exam">Physical exam</option>
+                  <option value="Vaccines">Vaccines</option>
+                  <option value="Reason not listed">Reason not listed</option>
+                </Form.Control>
               </Form.Group>
-
-              <Row>
-                <Col>
-                  <Form.Group controlId="formDate" className="mb-3">
-                    <Form.Label style={{ color: "#DD595D" }}>Date</Form.Label>
-                    <Form.Control
-                      type="date"
-                      name="date"
-                      value={appointmentDetails.date}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formTime" className="mb-3">
-                    <Form.Label style={{ color: "#DD595D" }}>Time</Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="time"
-                      value={appointmentDetails.time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
 
               <Form.Group controlId="formVet" className="mb-3">
                 <Form.Label style={{ color: "#DD595D" }}>Select Vet</Form.Label>
@@ -876,30 +910,65 @@ function ViewPets() {
                   as="select"
                   name="vet"
                   value={appointmentDetails.vet}
-                  onChange={handleChange}
+                  onChange={handleVetChange}
                   required
                 >
                   <option value="">Select a vet</option>
                   {vets.map((vet, index) => (
-                    <option key={index} value={vet.name}>
-                      {vet.name}
+                    <option key={vet.id} value={vet.id}>
+                      {vet.fullName}
                     </option>
                   ))}
                 </Form.Control>
               </Form.Group>
 
-              <Form.Group controlId="formAddress" className="mb-3">
-                <Form.Label style={{ color: "#DD595D" }}>Address</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="address"
-                  value={appointmentDetails.address}
-                  onChange={handleChange}
-                  readOnly
-                />
-              </Form.Group>
+              <div>
+                {vetSchedule.length > 0 && (
+                  <div className="mt-4">
+                    <h5>Available Appointments</h5>
+                    <Row className="g-3">
+                      {vetSchedule.map((schedule) => (
+                        <Col md={4} key={schedule.id}>
+                          <Card
+                            className={`h-100 ${
+                              selectedScheduleId === schedule.id
+                                ? "selected cards"
+                                : "cards"
+                            }`}
+                            onClick={() => handleCardSelect(schedule.id)}
+                            style={{
+                              border:
+                                selectedScheduleId === schedule.id
+                                  ? "3px solid #df575e" // Selected border color
+                                  : "2px solid #DD595D", // Default border color
+                              borderRadius: "5px",
+                              cursor: "pointer",
+                              transition: "border-color 0.2s ease",
+                            }}
+                          >
+                            <Card.Body>
+                              <Card.Title>
+                                {schedule.service_company_provider_name}
+                              </Card.Title>
+                              <Card.Text>
+                                <strong>Date:</strong> {schedule.schedule_date}{" "}
+                                <br />
+                                <strong>Time:</strong> {schedule.start_time} -{" "}
+                                {schedule.end_time} <br />
+                                <strong>Location:</strong> {schedule.location}{" "}
+                                <br />
+                                <strong>Cost:</strong> ${schedule.cost} <br />
+                              </Card.Text>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  </div>
+                )}
+              </div>
 
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-end mt-3">
                 <Button type="submit" variant="success">
                   Book Appointment
                 </Button>
@@ -908,83 +977,99 @@ function ViewPets() {
           )}
 
           {/* Display the list of appointments */}
-          <Row className="mt-3 g-3">
-            {appointments.map((appointment, index) => (
-              <Col md={6} key={index}>
-                <Card
-                  className="g-2"
-                  style={{
-                    border: "2px solid #ff6b6b",
-                    borderRadius: "0px",
-                    width: "100%",
-                  }}
-                >
-                  <Card.Body className="d-flex flex-row align-items-center">
-                    {/* Image Column */}
-                    <div className="me-3 ms-3">
-                      <img
-                        src="https://mighty.tools/mockmind-api/content/human/9.jpg" // Replace with your image URL
-                        alt="Doctor"
-                        className="rounded-circle"
-                        style={{ width: "100px", height: "100px" }}
-                      />
-                    </div>
+          <Row className="mt-3 g-3 mb-3">
+  {!showForm &&
+    (appointments.filter((appointment) => appointment.status === "confirmed")
+      .length > 0 ? (
+      <Row className="mt-3 g-3 mb-3">
+        {appointments
+          .filter((appointment) => appointment.status === "confirmed")
+          .map((appointment) => (
+            <Col md={12} key={appointment.id}>
+              <Card
+                className="d-flex flex-row align-items-center p-3"
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "10px",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                {/* Appointment Details Column */}
+                <div className="d-flex flex-column">
+                  <Card.Title
+                    style={{
+                      color: "#DD595D",
+                      fontWeight: "bold",
+                      fontSize: "1.05rem",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Dr. {appointment.provider_first_name}{" "}
+                    {appointment.provider_last_name}
+                    <span
+                      style={{ color: "#6f6f6f", fontWeight: "normal" }}
+                    >
+                      {" "}
+                      - {appointment.service_company_provider_name}
+                    </span>
+                  </Card.Title>
+                  <div style={{ color: "#6f6f6f", fontSize: "0.85rem" }}>
+                    <FaCalendar style={{ marginRight: "5px" }} />
+                    {appointment.schedule_date}
+                    {" - "}
+                    {formatTime(appointment.start_time)} -{" "}
+                    {formatTime(appointment.end_time)}
+                    <br />
+                    <FaMapMarkerAlt style={{ marginRight: "5px" }} />
+                    {appointment.location}
+                  </div>
+                  <div style={{ color: "#6f6f6f", marginTop: "5px" }}>
+                    <strong>Reason for visit:</strong> {appointment.notes}
+                  </div>
+                </div>
 
-                    {/* Appointment Details Column */}
-                    <div>
-                      <Card.Title
-                        style={{
-                          color: "#DD595D",
-                          fontWeight: "bolder",
-                          fontSize: "1.05rem",
-                        }}
-                      >
-                        {appointment.doctor}
-                      </Card.Title>
-                      <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                        <FaNotesMedical /> {appointment.reason}
-                      </p>
-                      <Row className="g-2">
-                        <Col xs={6}>
-                          <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                            <FaCalendar /> {appointment.date}
-                          </p>
-                        </Col>
-                        <Col xs={6}>
-                          <p
-                            className="text-end"
-                            style={{ color: "#6f4f37", fontSize: "0.85rem" }}
-                          >
-                            <FaMapMarkerAlt /> {appointment.location}
-                          </p>
-                        </Col>
-                      </Row>
-                      <Row className="g-2">
-                        <Col xs={6}>
-                          <Button
-                            variant="outline-primary"
-                            className="mt-2"
-                            onClick={() => handleReschedule(index)}
-                          >
-                            Reschedule
-                          </Button>
-                        </Col>
-                        <Col xs={6}>
-                          <Button
-                            variant="outline-primary"
-                            className="mt-2 me-2"
-                            onClick={() => cancelAppointment(index)}
-                          >
-                            Cancel
-                          </Button>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                {/* Action Buttons Column */}
+                <div className="ms-auto d-flex align-items-center">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => handleReschedule(appointment.id)}
+                    style={{
+                      border: "1px solid #007bff",
+                      color: "#007bff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Reschedule
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => handleDeleteAppointment(appointment.id)}
+                    style={{
+                      border: "1px solid #dc3545",
+                      color: "#dc3545",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Card>
+            </Col>
+          ))}
+      </Row>
+    ) : (
+      !showForm && (
+        <p className="mt-4 text-center">
+          No appointments found for this pet.
+        </p>
+      )
+    ))}
+</Row>
+
         </Tab>
       </Tabs>
 
@@ -1128,7 +1213,10 @@ function ViewPets() {
           >
             Close
           </Button>
-          <Button variant="primary" onClick={saveRescheduledAppointment}>
+          <Button
+            variant="primary"
+            // onClick={saveRescheduledAppointment}
+          >
             Save Changes
           </Button>
         </Modal.Footer>
@@ -1145,6 +1233,17 @@ function ViewPets() {
         onConfirm={() => setShowConfirmModal(false)}
         showConfirm={true}
         confirmText="Close"
+      />
+      <CustomModal
+        show={showErrorModal}
+        title="Error"
+        message="Please select a schedule before booking."
+        onConfirm={() => setShowErrorModal(false)}
+        showConfirm={true}
+        showCancel={false}
+        confirmText="Cancel"
+        cancelText="Cancel"
+        variant="danger"
       />
     </Container>
   );
