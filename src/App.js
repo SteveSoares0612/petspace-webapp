@@ -26,17 +26,18 @@ const AppRoutes = () => {
       <Row>
         <Col md={12}>
           <Routes>
-            <Route path="*" element={<NotFound />} /> {/* Catch-all */}
+            <Route path="/signin" element={<SignIn />} /> 
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/" element={<LandingPage /> } />
             <Route path="/home" element={isAuthenticated ? <Home /> : <SignIn />} />
             <Route path="/events" element={isAuthenticated ? <Events /> : <SignIn />} />
             <Route path="/profile" element={isAuthenticated ? <Profile /> : <SignIn />} />
             <Route path="/family" element={isAuthenticated ? <Family /> : <SignIn />} />
             <Route path="/health" element={isAuthenticated ? <Health /> : <SignIn />} />
-            <Route path="/signin" element={<SignIn />} /> 
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/managepets" element={<ManagePets />} />
-            <Route path="/viewpets/:id" element={<ViewPets />} />
+            <Route path="/managepets" element={isAuthenticated ? <ManagePets /> : <SignIn />} />
+            <Route path="/viewpets/:id" element={isAuthenticated ? <ViewPets /> : <SignIn />} />
+            <Route path="*" element={isAuthenticated ? <NotFound /> : <SignIn />} /> {/* Catch-all */}
+
           </Routes>
         </Col>
       </Row>

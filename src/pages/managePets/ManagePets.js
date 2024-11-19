@@ -16,7 +16,8 @@ import { Link } from "react-router-dom";
 import "./ManagePets.css";
 import deleteIcon from "../../assets/images/delete.png";
 import { useAuth } from "../../context/AuthContext";
-import ViewPets from "./ViewPets";
+import breeds from "../../data/Breeds";
+
 
 const ManagePets = () => {
   const { petList, addPet, deletePet, getPetList } = useAuth();
@@ -24,6 +25,7 @@ const ManagePets = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAddPetForm, setShowAddPetForm] = useState(false);
   const [petToDelete, setPetToDelete] = useState(null);
+
 
   const [newPet, setNewPet] = useState({
     name: "",
@@ -47,11 +49,11 @@ const ManagePets = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewPet((prevPet) => {
-      const updatedPet = { ...prevPet, [name]: value };
-      console.log("Updated Pet:", updatedPet);
-      return updatedPet;
-    });
+    setNewPet((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "type" && { breed: "" }),
+    }));
   };
 
   const handleSavePet = async () => {
@@ -184,14 +186,20 @@ const ManagePets = () => {
                   </Form.Select>
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label className="mt-2">Enter Breed</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter breed"
+                  <Form.Label className="mt-2">Choose Breed</Form.Label>
+                  <Form.Select
                     name="breed"
                     value={newPet.breed}
                     onChange={handleInputChange}
-                  />
+                    disabled={!newPet.type}
+                  >
+                    <option value="">Select a breed</option>
+                    {breeds[newPet.type]?.map((breed) => (
+                      <option key={breed} value={breed}>
+                        {breed}
+                      </option>
+                    ))}
+                  </Form.Select>
                 </Form.Group>
                 <Form.Group>
                   <Form.Label className="mt-2">Enter Date of Birth</Form.Label>

@@ -94,3 +94,19 @@
   flex-direction: row;
   justify-content: space-between;
 }
+
+
+.cards {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cards.selected {
+  border: 3px solid #df575e !important; /* Override Bootstrap's default border */
+  box-shadow: 0 4px 8px rgba(223, 87, 94, 0.5); /* Optional shadow */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cards:hover {
+  border-color: #df575e !important; /* Optional hover effect */
+}
