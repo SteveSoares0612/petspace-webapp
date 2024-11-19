@@ -54,6 +54,8 @@ function ViewPets() {
     bookAppointment,
     getPetAppointments,
     deletePetAppointment,
+    uploadPetRecord,
+    getPetRecords,
   } = useAuth();
 
   const [petName, setPetname] = useState();
@@ -100,6 +102,21 @@ function ViewPets() {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [rescheduleIndex, setRescheduleIndex] = useState(null);
   const [rescheduleData, setRescheduleData] = useState({ date: "", time: "" });
+  const [isLoadingAppointment, setIsLoadingAppointment] = useState(false);
+
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      try {
+        const records = await getPetRecords(id); // `id` is the pet ID from the URL
+        setAttachments(records);
+        console.log("RECORDS", attachments);
+      } catch (error) {
+        console.error("Error fetching attachments:", error);
+      }
+    };
+
+    fetchAttachments();
+  }, [id, getPetRecords]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,18 +134,19 @@ function ViewPets() {
   }, [id]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUpdatedAppointments = async () => {
       try {
-        const appointmentsList = await getPetAppointments(id);
-        console.log("Fetched Appointments:", appointmentsList);
-        setAppointments(appointmentsList || []);
+        const updatedAppointments = await getPetAppointments(id);
+        setAppointments(updatedAppointments || []);
       } catch (error) {
-        console.error("Error fetching appointments:", error);
+        console.error("Error fetching updated appointments:", error);
       }
     };
 
-    fetchData();
-  }, [id]);
+    if (!isLoadingAppointment && !showForm) {
+      fetchUpdatedAppointments();
+    }
+  }, [isLoadingAppointment, showForm, id]);
 
   useEffect(() => {
     if (petAllergies) {
@@ -162,23 +180,14 @@ function ViewPets() {
     }
   }, [allergenList]);
 
-  const [reminders, setReminders] = useState([
-    {
-      name: "Aspirin",
-      description: "500mg BAYER, 1 tablet",
-      date: "Everyday, 22:00",
-    },
-    { name: "Walk", description: "1 hour", date: "Everyday, 22:00" },
-    { name: "Brush", description: "1 hour", date: "Everyday, 22:00" },
-  ]);
   const [appointments, setAppointments] = useState([]);
-
-  const addAppointment = (newAppointment) => {
-    setAppointments((prevAppointments) => [
-      ...prevAppointments,
-      newAppointment,
-    ]);
-  };
+  // {
+  //   reason: "",
+  //   date: "",
+  //   time: "",
+  //   vet: "",
+  //   address: "",
+  // }
 
   const handleShowModal = (type, index = null) => {
     setModalType(type);
@@ -228,7 +237,6 @@ function ViewPets() {
   const getDataArray = (type) => {
     if (type === "allergy") return allergies;
     if (type === "specialCondition") return specialConditions;
-    if (type === "reminder") return reminders;
   };
 
   const handleSaveModal = () => {
@@ -281,10 +289,12 @@ function ViewPets() {
   };
 
   const handleDeleteAppointment = async (appointmentID) => {
-    try { 
+    try {
       await deletePetAppointment(id, appointmentID);
       setAppointments((prevAppointments) =>
-        prevAppointments.filter((appointment) => appointment.id !== appointmentID)
+        prevAppointments.filter(
+          (appointment) => appointment.id !== appointmentID
+        )
       );
       console.log(`Appointment with ID ${appointmentID} deleted successfully.`);
     } catch (error) {
@@ -293,7 +303,7 @@ function ViewPets() {
       setShowErrorModal(true);
     }
   };
-  
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -337,22 +347,19 @@ function ViewPets() {
 
   const [file, setFile] = useState(null);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
+  const handleFileUpload = async (file) => {
+    if (!file) {
+      alert("Please select a file to upload.");
+      return;
     }
-  };
 
-  const handleFileUpload = () => {
-    if (file) {
-      const newAttachment = {
-        name: file.name,
-        date: new Date().toLocaleDateString(), // Current date in 'MM/DD/YYYY' format
-        file: file,
-      };
+    try {
+      const newAttachment = await uploadPetRecord(id, file); // Pass the file directly to the API call
       setAttachments((prevAttachments) => [...prevAttachments, newAttachment]);
-      setFile(null);
+      alert("File uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("An error occurred while uploading the file. Please try again.");
     }
   };
 
@@ -389,6 +396,17 @@ function ViewPets() {
       hour: "numeric",
       minute: "numeric",
       hour12: true, // Convert to AM/PM format
+    });
+  };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -432,26 +450,33 @@ function ViewPets() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!selectedScheduleId) {
       setShowErrorModal(true);
       return;
     }
-  
+
+    setIsLoadingAppointment(true);
     try {
       const newAppointment = await bookAppointment(
         id,
         selectedScheduleId,
         appointmentDetails.reason
       );
-  
-      // Log the new appointment to verify its structure
-      console.log("New Appointment:", newAppointment);
-  
-      // Dynamically add the new appointment to the state
-      setAppointments((prevAppointments) => [...prevAppointments, newAppointment]);
-  
-      // Reset the form and close it
+
+      // Ensure the new appointment is valid and has a `status`
+      const appointmentWithDefaults = {
+        ...newAppointment,
+        status: newAppointment?.status || "pending",
+      };
+
+      // Update state with the new appointment
+      setAppointments((prevAppointments) => [
+        ...prevAppointments,
+        appointmentWithDefaults,
+      ]);
+
+      // Clear form and state
       setAppointmentDetails({
         reason: "",
         date: "",
@@ -461,17 +486,17 @@ function ViewPets() {
       });
       setSelectedScheduleId(null);
       setShowForm(false);
-  
+
       setModalMessage("Appointment booked successfully!");
       setShowConfirmModal(true);
     } catch (error) {
       console.error("Error booking appointment:", error);
       setModalMessage("Failed to book the appointment. Please try again.");
       setShowErrorModal(true);
+    } finally {
+      setIsLoadingAppointment(false);
     }
   };
-  
-  
 
   return (
     <Container className="my-3">
@@ -673,52 +698,253 @@ function ViewPets() {
               </Button>
             </>
           ) : (
-            <p className="mt-2">{bio}</p>
+            <p className="mt-2 text-muted mb-1">
+              {bio
+                ? bio
+                : "Description for pet not added yet, click the edit icon to add description"}
+            </p>
           )}
-          {/* overview appointment */}
-          <Row className="mt-3 g-3">
-          
-          <h5 className="mb-0">Upcoming Appointments</h5>
-            {appointments.filter((appointment) => appointment.status === "confirmed").map((appointment, index) => (
-              <Col md={6} key={index}>
-                <Card
-                  className="rounded-3"
-                  style={{
-                    backgroundColor: "#FFE782",
-                    width: "100%",
-                    border: "none",
-                  }}
-                >
-                  <Card.Body>
-                    {/* Title */}
-                    <Card.Title className="text-dark">
-                      {`${appointment.provider_first_name} ${appointment.provider_last_name}`}
-                    </Card.Title>
-
-                    {/* Appointment details */}
-                    <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                      <FaNotesMedical /> {appointment.notes}
-                    </p>
-                    <Row className="g-2">
-                      <Col xs={6}>
-                        <p style={{ color: "#6f4f37", fontSize: "0.85rem" }}>
-                          <FaCalendar /> {appointment.schedule_date}
-                        </p>
-                      </Col>
-                      <Col xs={6}>
-                        <p
-                          className="text-end"
-                          style={{ color: "#6f4f37", fontSize: "0.85rem" }}
-                        >
-                          <FaMapMarkerAlt /> {appointment.location}
-                        </p>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
+          <Row className="flex-wrap mt-3">
+            <h4 className="mb-0">Allergies</h4>
+            {allergies.length === 0 ? (
+              <Col className="mt-2">
+                <p className="text-muted">No allergies added yet</p>
               </Col>
-            ))}
+            ) : (
+              allergies.map((allergy) => (
+                <Col sm={4} key={allergy.id} className="mb-0">
+                  <Badge
+                    bg="white"
+                    text="danger"
+                    className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center mt-3"
+                    style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+                  >
+                    {/* Allergy text */}
+                    <span className="flex-grow-1 text-start">
+                      {allergy.allergen}
+                    </span>
+
+                    {/* Edit and Delete icons */}
+                    <div className="d-flex">
+                      {/* Delete icon */}
+                      <span
+                        onClick={() => handleDeleteAllergy(allergy.allergen_id)}
+                        className="ms-2 cursor-pointer text-danger"
+                      >
+                        <FaTrash style={{ cursor: "pointer" }} />
+                      </span>
+                    </div>
+                  </Badge>
+                </Col>
+              ))
+            )}
           </Row>
+
+          <Row className="flex-wrap mt-3">
+            <h4 className="mb-0">Special Conditions</h4>
+            {specialConditions.length > 0 ? (
+              specialConditions.map((condition, index) => (
+                <Col sm={4} key={condition.id} className="mb-1">
+                  <Badge
+                    bg="white"
+                    text="danger"
+                    className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center mt-3"
+                    style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+                  >
+                    <span className="flex-grow-1 text-start">
+                      {condition.condition_name}
+                    </span>
+
+                    {/* Edit and Delete icons */}
+                    <div className="d-flex">
+                      <span
+                        onClick={() =>
+                          handleShowModal("specialCondition", index)
+                        }
+                        className="ms-2 cursor-pointer text-pink"
+                      >
+                        <FaEdit style={{ cursor: "pointer" }} />
+                      </span>
+                      <span
+                        onClick={() => handleDeleteCondition(condition.id)}
+                        className="ms-2 cursor-pointer text-danger"
+                      >
+                        <FaTrash style={{ cursor: "pointer" }} />
+                      </span>
+                    </div>
+                  </Badge>
+                </Col>
+              ))
+            ) : (
+              <Col>
+                <p className="text-muted mt-2">
+                  No special conditions added yet
+                </p>
+              </Col>
+            )}
+          </Row>
+
+          {/* overview appointment */}
+          <Row className="mt-1 g-3 mb-3">
+            <h4 className="mb-0">Upcoming Appointments</h4>
+            {!showForm &&
+              (appointments.filter(
+                (appointment) => appointment.status === "confirmed"
+              ).length > 0 ? (
+                <Row className="mt-3 g-3 mb-3">
+                  {appointments
+                    .filter((appointment) => appointment.status === "confirmed")
+                    .map((appointment) => (
+                      <Col md={12} key={appointment.id}>
+                        <Card
+                          className="d-flex flex-row align-items-center p-3"
+                          style={{
+                            border: "1px solid #e0e0e0",
+                            borderRadius: "10px",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <div className="d-flex flex-column">
+                            <Card.Title
+                              style={{
+                                color: "#DD595D",
+                                fontWeight: "bold",
+                                fontSize: "1.05rem",
+                                marginBottom: "5px",
+                              }}
+                            >
+                              Dr. {appointment.provider_first_name}{" "}
+                              {appointment.provider_last_name}
+                              <span
+                                style={{
+                                  color: "#6f6f6f",
+                                  fontWeight: "normal",
+                                }}
+                              >
+                                {" "}
+                                - {appointment.service_company_provider_name}
+                              </span>
+                            </Card.Title>
+                            <div
+                              style={{ color: "#6f6f6f", fontSize: "0.85rem" }}
+                            >
+                              <FaCalendar style={{ marginRight: "5px" }} />
+                              {appointment.schedule_date}
+                              {" - "}
+                              {formatTime(appointment.start_time)} -{" "}
+                              {formatTime(appointment.end_time)}
+                              <br />
+                              <FaMapMarkerAlt style={{ marginRight: "5px" }} />
+                              {appointment.location}
+                            </div>
+                            <div style={{ color: "#6f6f6f", marginTop: "5px" }}>
+                              <strong>Reason for visit:</strong>{" "}
+                              {appointment.notes}
+                            </div>
+                          </div>
+
+                          <div className="ms-auto d-flex align-items-center">
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => handleReschedule(appointment.id)}
+                              style={{
+                                border: "1px solid",
+                                color: "white",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Reschedule
+                            </Button>
+                            <Button
+                              variant="button-primary"
+                              size="sm"
+                              onClick={() =>
+                                handleDeleteAppointment(appointment.id)
+                              }
+                              style={{
+                                border: "1px solid #dc3545",
+                                color: "#dc3545",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                </Row>
+              ) : (
+                !showForm && (
+                  <p className="mt-4 text-start text-muted">
+                    No appointments found for this pet.
+                  </p>
+                )
+              ))}
+          </Row>
+          <h4 className="mb-0">Records</h4>
+
+          <Table striped bordered hover className="mt-3">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Date Uploaded</th>
+                <th>File</th>
+                <th>Uploaded By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attachments.length > 0 ? (
+                attachments.map((attachment, index) => {
+                  if (!attachment || !attachment.filename) {
+                    return (
+                      <tr key={index}>
+                        <td colSpan="4" className="text-center text-muted">
+                          Invalid attachment data
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return (
+                    <tr key={index}>
+                      <td>{attachment.filename || "Untitled Document"}</td>
+                      <td>
+                        {formatDate(attachment.created_at) || "Unknown Date"}
+                      </td>
+                      <td>
+                        {attachment.record_path ? (
+                          <a
+                            href={attachment.record_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                          >
+                            View
+                          </a>
+                        ) : (
+                          <span>No file available</span>
+                        )}
+                      </td>
+                      <td>
+                        {`${attachment.added_by_first_name}${" "}${
+                          attachment.added_by_last_name
+                        }` || "Unknown"}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center text-muted">
+                    No records uploaded yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
         </Tab>
 
         <Tab eventKey="history" title="History">
@@ -778,83 +1004,136 @@ function ViewPets() {
           </Button>
 
           <Row className="flex-wrap mt-3">
-            {specialConditions.length === 0 ? specialConditions.map((condition, index) => (
-              <Col sm={4} key={condition.id} className="mb-2">
-                <Badge
-                  bg="white"
-                  text="danger"
-                  className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center"
-                  style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
-                >
-                  <span className="flex-grow-1 text-start">
-                    {condition.condition_name}
-                  </span>
+            {specialConditions.length > 0 ? (
+              specialConditions.map((condition, index) => (
+                <Col sm={4} key={condition.id} className="mb-1">
+                  <Badge
+                    bg="white"
+                    text="danger"
+                    className="p-2 w-100 d-inline-flex justify-content-between align-items-center text-center"
+                    style={{ border: "1px solid #ff6b6b", borderRadius: "0px" }}
+                  >
+                    <span className="flex-grow-1 text-start">
+                      {condition.condition_name}
+                    </span>
 
-                  {/* Edit and Delete icons */}
-                  <div className="d-flex">
-                    <span
-                      onClick={() => handleShowModal("specialCondition", index)}
-                      className="ms-2 cursor-pointer text-pink"
-                    >
-                      <FaEdit style={{ cursor: "pointer" }} />
-                    </span>
-                    <span
-                      onClick={() => handleDeleteCondition(condition.id)}
-                      className="ms-2 cursor-pointer text-danger"
-                    >
-                      <FaTrash style={{ cursor: "pointer" }} />
-                    </span>
-                  </div>
-                </Badge>
+                    {/* Edit and Delete icons */}
+                    <div className="d-flex">
+                      <span
+                        onClick={() =>
+                          handleShowModal("specialCondition", index)
+                        }
+                        className="ms-2 cursor-pointer text-pink"
+                      >
+                        <FaEdit style={{ cursor: "pointer" }} />
+                      </span>
+                      <span
+                        onClick={() => handleDeleteCondition(condition.id)}
+                        className="ms-2 cursor-pointer text-danger"
+                      >
+                        <FaTrash style={{ cursor: "pointer" }} />
+                      </span>
+                    </div>
+                  </Badge>
+                </Col>
+              ))
+            ) : (
+              <Col>
+                <p className="text-muted mt-2">
+                  No special conditions added yet
+                </p>
               </Col>
-            )) :  <Col>
-            <p className="text-muted">No special conditions added yet</p>
-          </Col>}
+            )}
           </Row>
-
-          
 
           {/* Attachments */}
           <h5 className="mt-4">Records</h5>
 
-          {/* File Upload Button */}
           <div className="d-flex">
-            <Button
-              variant="outline-danger"
-              className="mb-2"
-              onClick={handleFileUpload}
-            >
-              <FaUpload /> Upload
-            </Button>
-            {/* File Input */}
-            <input type="file" onChange={handleFileChange} className="ms-2" />
+            <div className="d-flex">
+              <Button
+                variant="outline-danger"
+                className="mb-2"
+                onClick={() => document.getElementById("recordUpload").click()}
+              >
+                <FaUpload /> Upload
+              </Button>
+              <input
+                id="recordUpload"
+                type="file"
+                accept=".pdf" // Restrict file selection to PDFs only
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    // Validate file type
+                    if (file.type !== "application/pdf") {
+                      alert("Only PDF files are allowed.");
+                      return;
+                    }
+                    handleFileUpload(file); // Call the upload function
+                  }
+                }}
+              />
+            </div>
           </div>
 
-          {/* Table to display records */}
           <Table striped bordered hover>
             <thead>
               <tr>
                 <th>Document</th>
                 <th>Date Uploaded</th>
-                <th>File</th> {/* Added a column for the file itself */}
+                <th>File</th>
+                <th>Uploaded By</th>
               </tr>
             </thead>
             <tbody>
-              {attachments.map((attachment, index) => (
-                <tr key={index}>
-                  <td>{attachment.name}</td>
-                  <td>{attachment.date}</td>
-                  <td>
-                    {attachment.file ? (
-                      <a href={URL.createObjectURL(attachment.file)} download>
-                        Download
-                      </a>
-                    ) : (
-                      <span>No file available</span>
-                    )}
+              {attachments.length > 0 ? (
+                attachments.map((attachment, index) => {
+                  if (!attachment || !attachment.filename) {
+                    return (
+                      <tr key={index}>
+                        <td colSpan="4" className="text-center text-muted">
+                          Invalid attachment data
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return (
+                    <tr key={index}>
+                      <td>{attachment.filename || "Untitled Document"}</td>
+                      <td>
+                        {formatDate(attachment.created_at) || "Unknown Date"}
+                      </td>
+                      <td>
+                        {attachment.record_path ? (
+                          <a
+                            href={attachment.record_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                          >
+                            View
+                          </a>
+                        ) : (
+                          <span>No file available</span>
+                        )}
+                      </td>
+                      <td>
+                        {`${attachment.added_by_first_name}${" "}${
+                          attachment.added_by_last_name
+                        }` || "Unknown"}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center text-muted">
+                    No records uploaded yet
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </Table>
         </Tab>
@@ -940,7 +1219,7 @@ function ViewPets() {
                               border:
                                 selectedScheduleId === schedule.id
                                   ? "3px solid #df575e" // Selected border color
-                                  : "2px solid #DD595D", // Default border color
+                                  : "1px solid lightgrey", // Default border color
                               borderRadius: "5px",
                               cursor: "pointer",
                               transition: "border-color 0.2s ease",
@@ -978,98 +1257,117 @@ function ViewPets() {
 
           {/* Display the list of appointments */}
           <Row className="mt-3 g-3 mb-3">
-  {!showForm &&
-    (appointments.filter((appointment) => appointment.status === "confirmed")
-      .length > 0 ? (
-      <Row className="mt-3 g-3 mb-3">
-        {appointments
-          .filter((appointment) => appointment.status === "confirmed")
-          .map((appointment) => (
-            <Col md={12} key={appointment.id}>
-              <Card
-                className="d-flex flex-row align-items-center p-3"
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "10px",
-                  backgroundColor: "#ffffff",
-                  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                {/* Appointment Details Column */}
-                <div className="d-flex flex-column">
-                  <Card.Title
-                    style={{
-                      color: "#DD595D",
-                      fontWeight: "bold",
-                      fontSize: "1.05rem",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    Dr. {appointment.provider_first_name}{" "}
-                    {appointment.provider_last_name}
-                    <span
-                      style={{ color: "#6f6f6f", fontWeight: "normal" }}
-                    >
-                      {" "}
-                      - {appointment.service_company_provider_name}
-                    </span>
-                  </Card.Title>
-                  <div style={{ color: "#6f6f6f", fontSize: "0.85rem" }}>
-                    <FaCalendar style={{ marginRight: "5px" }} />
-                    {appointment.schedule_date}
-                    {" - "}
-                    {formatTime(appointment.start_time)} -{" "}
-                    {formatTime(appointment.end_time)}
-                    <br />
-                    <FaMapMarkerAlt style={{ marginRight: "5px" }} />
-                    {appointment.location}
-                  </div>
-                  <div style={{ color: "#6f6f6f", marginTop: "5px" }}>
-                    <strong>Reason for visit:</strong> {appointment.notes}
-                  </div>
-                </div>
+            {!isLoadingAppointment
+              ? !showForm &&
+                (appointments.filter(
+                  (appointment) => appointment.status === "confirmed"
+                ).length > 0 ? (
+                  <Row className="mt-3 g-3 mb-3">
+                    {appointments
+                      .filter(
+                        (appointment) => appointment.status === "confirmed"
+                      )
+                      .map((appointment) => (
+                        <Col md={12} key={appointment.id}>
+                          <Card
+                            className="d-flex flex-row align-items-center p-3"
+                            style={{
+                              border: "1px solid #e0e0e0",
+                              borderRadius: "10px",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                            }}
+                          >
+                            {/* Appointment Details Column */}
+                            <div className="d-flex flex-column">
+                              <Card.Title
+                                style={{
+                                  color: "#DD595D",
+                                  fontWeight: "bold",
+                                  fontSize: "1.05rem",
+                                  marginBottom: "5px",
+                                }}
+                              >
+                                Dr. {appointment.provider_first_name}{" "}
+                                {appointment.provider_last_name}
+                                <span
+                                  style={{
+                                    color: "#6f6f6f",
+                                    fontWeight: "normal",
+                                  }}
+                                >
+                                  {" "}
+                                  - {appointment.service_company_provider_name}
+                                </span>
+                              </Card.Title>
+                              <div
+                                style={{
+                                  color: "#6f6f6f",
+                                  fontSize: "0.85rem",
+                                }}
+                              >
+                                <FaCalendar style={{ marginRight: "5px" }} />
+                                {appointment.schedule_date}
+                                {" - "}
+                                {formatTime(appointment.start_time)} -{" "}
+                                {formatTime(appointment.end_time)}
+                                <br />
+                                <FaMapMarkerAlt
+                                  style={{ marginRight: "5px" }}
+                                />
+                                {appointment.location}
+                              </div>
+                              <div
+                                style={{ color: "#6f6f6f", marginTop: "5px" }}
+                              >
+                                <strong>Reason for visit:</strong>{" "}
+                                {appointment.notes}
+                              </div>
+                            </div>
 
-                {/* Action Buttons Column */}
-                <div className="ms-auto d-flex align-items-center">
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleReschedule(appointment.id)}
-                    style={{
-                      border: "1px solid #007bff",
-                      color: "#007bff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Reschedule
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDeleteAppointment(appointment.id)}
-                    style={{
-                      border: "1px solid #dc3545",
-                      color: "#dc3545",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </Card>
-            </Col>
-          ))}
-      </Row>
-    ) : (
-      !showForm && (
-        <p className="mt-4 text-center">
-          No appointments found for this pet.
-        </p>
-      )
-    ))}
-</Row>
-
+                            {/* Action Buttons Column */}
+                            <div className="ms-auto d-flex align-items-center">
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                className="me-2"
+                                onClick={() => handleReschedule(appointment.id)}
+                                style={{
+                                  border: "1px solid",
+                                  color: "white",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                Reschedule
+                              </Button>
+                              <Button
+                                variant="button-primary"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeleteAppointment(appointment.id)
+                                }
+                                style={{
+                                  border: "1px solid #dc3545",
+                                  color: "#dc3545",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </Card>
+                        </Col>
+                      ))}
+                  </Row>
+                ) : (
+                  !showForm && (
+                    <p className="mt-4 text-center">
+                      No appointments found for this pet.
+                    </p>
+                  )
+                ))
+              : "Loading Appointments"}
+          </Row>
         </Tab>
       </Tabs>
 

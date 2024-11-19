@@ -1,124 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-// import 'bootstrap-icons/font/bootstrap-icons.css';
-import './Events.css';
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./Events.css";
+
+import peteventImage1 from "../../assets/images/petevent1.jpeg";
+import peteventImage2 from "../../assets/images/petevent2.jpeg";
+import peteventImage3 from "../../assets/images/petevent3.jpeg";
+import peteventImage4 from "../../assets/images/petevent4.jpeg";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
 
-  // Simulating JSON Data Fetch
   useEffect(() => {
     const eventData = [
       {
-        title: 'International Pet Day',
-        date: 'Wed, Apr 28',
-        time: '5:30 PM',
-        address: '36 Guild Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://img.pikbest.com/origin/06/18/92/40cpIkbEsTeXT.jpg!w700wp',  // Image URL for the event
+        title: "3RD ANNUAL PAW-LIDAY FESTIVAL PRESENTED BY PET VALU",
+        date: "Sat, Nov 30",
+        time: "10:00 AM - 5:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
+        price: "FREE",
+        imageUrl: peteventImage4,
       },
       {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',  // Image URL for the event
+        title: "4TH ANNUAL HOWLOWEEN POOCH PARTY",
+        date: "Sat, Oct 26",
+        time: "12:00 PM - 5:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
+        price: "FREE",
+        imageUrl: peteventImage3,
       },
       {
-        title: 'Adoption Event',
-        date: 'Fri, May 14',
-        time: '2:00 PM',
-        address: '28 Groom Avenue London, UK',
-        price: 'FREE',
-        imageUrl: 'https://kidlinks-assets.s3.amazonaws.com/uploads/Hugapalooza-2024-Flyer-SQUARE-1.png',  // Image URL for the event
+        title: "DOGTOBERFEST (Day 1)",
+        date: "Sat, Oct 12",
+        time: "11:00 AM - 6:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
+        price: "FREE",
+        imageUrl: peteventImage2,
       },
       {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',  // Image URL for the event
+        title: "ORANGE SHIRT DAY PACK WALK",
+        date: "Wed, Sep 11",
+        time: "6:30 PM - 8:00 PM",
+        address: "801 Trillium Drive Kitchener, ON, N2R 1K4 Canada",
+        price: "FREE",
+        imageUrl: peteventImage1,
       },
-      {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',  // Image URL for the event
-      },
-      {
-        title: 'Adoption Event',
-        date: 'Fri, May 14',
-        time: '2:00 PM',
-        address: '28 Groom Avenue London, UK',
-        price: 'FREE',
-        imageUrl: 'https://sonomacounty.ca.gov/Main%20County%20Site/Administrative%20Support%20%26%20Fiscal%20Services/IOLERO/Images/Screenshot%202024-09-06%20114349.png',  // Image URL for the event
-      },
-      {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',  // Image URL for the event
-      },
-      {
-        title: 'Pet Care Workshop',
-        date: 'Thu, May 13',
-        time: '10:00 AM',
-        address: '45 Pet Street London, UK',
-        price: 'FREE',
-        imageUrl: 'https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg',  // Image URL for the event
-      },
-      {
-        title: 'Adoption Event',
-        date: 'Fri, May 14',
-        time: '2:00 PM',
-        address: '28 Groom Avenue London, UK',
-        price: 'FREE',
-        imageUrl: 'https://sonomacounty.ca.gov/Main%20County%20Site/Administrative%20Support%20%26%20Fiscal%20Services/IOLERO/Images/Screenshot%202024-09-06%20114349.png',  // Image URL for the event
-      }
     ];
+
     setEvents(eventData);
   }, []);
 
   return (
-    <Container className="mt-4">
-      <h5>Events &gt; Browse</h5>
-      <Row>
-        {events.map((event, index) => (
-          <Col key={index} md={3} className="mb-4"> 
-            <Card className="event-card">
-              <Card.Img className='event-image'
-                variant="top"
-                src={event.imageUrl}  
-                alt={event.title}
-              />
-              <Card.Body>
-                <p className="text-muted small mb-1">
-                  {event.date} - {event.time}
-                </p>
-                <Card.Title>{event.title}</Card.Title>
-                <p className="text-muted small">
-                  <i className="bi bi-geo-alt"></i> {event.address}
-                </p>
-                <div className="d-flex justify-content-between align-items-center">
-                  <Button variant="primary" size="sm">
-                    Attend
-                  </Button>
-                  <span className="text-success">{event.price}</span>
-                
-                </div>
-              </Card.Body>
-            </Card>
+    <>
+      <Container className="mt-3 ms-0">
+        <Row>
+          <Col className="d-flex justify-content-between align-items-center">
+            <h2>Events</h2>
           </Col>
-        ))}
-      </Row>
-    </Container>
+        </Row>
+      </Container>
+      <Container className="mt-4">
+        <Row>
+          {events.map((event, index) => (
+            <Col key={index} md={3} className="d-flex align-items-stretch mb-4">
+              <Card className="w-100">
+                <Card.Img
+                  className="event-image"
+                  variant="top"
+                  src={event.imageUrl}
+                  alt={event.title}
+                />
+                <Card.Body className="d-flex flex-column">
+                  <p className="text-muted small mb-1">
+                    {event.date} - {event.time}
+                  </p>
+                  <Card.Title>{event.title}</Card.Title>
+                  <p className="text-muted small">
+                    <i className="bi bi-geo-alt"></i> {event.address}
+                  </p>
+                  <div className="mt-auto d-flex justify-content-between align-items-center">
+                    <Button variant="primary" size="sm">
+                      Remind me
+                    </Button>
+                    <span className="text-success">{event.price}</span>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Container>
+    </>
   );
 };
 

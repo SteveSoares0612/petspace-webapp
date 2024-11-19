@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { FaChevronRight, FaSearchLocation } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 
-import dog1 from "../assets/images/dog1.jpg";
-import dog2 from "../assets/images/dog2.jpg";
-import dog3 from "../assets/images/dog3.jpg";
+import peteventImage1 from "../assets/images/petevent1.jpeg";
+import peteventImage2 from "../assets/images/petevent2.jpeg";
+import peteventImage3 from "../assets/images/petevent3.jpeg";
+import peteventImage4 from "../assets/images/petevent4.jpeg";
 import "../pages/signin/signIn.css";
 import previewImage from "../assets/images/previewImage.jpg";
+import Events from "./Events/Events";
 
 function Home() {
   const { petList } = useAuth();
@@ -25,31 +27,39 @@ function Home() {
   useEffect(() => {
     const eventData = [
       {
-        title: "International Pet Day",
-        date: "Wed, Apr 28",
-        time: "5:30 PM",
-        address: "36 Guild Street London, UK",
+        title: "3RD ANNUAL PAW-LIDAY FESTIVAL PRESENTED BY PET VALU",
+        date: "Sat, Nov 30",
+        time: "10:00 AM - 5:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
         price: "FREE",
-        imageUrl: "https://img.pikbest.com/origin/06/18/92/40cpIkbEsTeXT.jpg",
+        imageUrl: peteventImage4,
       },
       {
-        title: "Pet Care Workshop",
-        date: "Thu, May 13",
-        time: "10:00 AM",
-        address: "45 Pet Street London, UK",
+        title: "4TH ANNUAL HOWLOWEEN POOCH PARTY",
+        date: "Sat, Oct 26",
+        time: "12:00 PM - 5:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
         price: "FREE",
-        imageUrl: "https://pbs.twimg.com/media/GMcC7dwXkAI00VK.jpg",
+        imageUrl: peteventImage3,
       },
       {
-        title: "Adoption Event",
-        date: "Fri, May 14",
-        time: "2:00 PM",
-        address: "28 Groom Avenue London, UK",
+        title: "DOGTOBERFEST (Day 1)",
+        date: "Sat, Oct 12",
+        time: "11:00 AM - 6:00 PM",
+        address: "44 Gaukel Street Kitchener, ON, N2G 4P3 Canada",
         price: "FREE",
-        imageUrl:
-          "https://kidlinks-assets.s3.amazonaws.com/uploads/Hugapalooza-2024-Flyer-SQUARE-1.png",
+        imageUrl: peteventImage2,
+      },
+      {
+        title: "ORANGE SHIRT DAY PACK WALK",
+        date: "Wed, Sep 11",
+        time: "6:30 PM - 8:00 PM",
+        address: "801 Trillium Drive Kitchener, ON, N2R 1K4 Canada",
+        price: "FREE",
+        imageUrl: peteventImage1,
       },
     ];
+
     setEvents(eventData);
   }, []);
 
@@ -107,60 +117,7 @@ function Home() {
           ))}
         </Row>
       </Container>
-      <Container className="mt-3 ms-0">
-        <Row>
-          <Col className="d-flex justify-content-between align-items-center">
-            <h2>Events</h2>
-            <a
-              href="/events" // Link to the "See All" page
-              className="d-flex align-items-center link-dark link-underline-opacity-0"
-            >
-              <span>see all</span>
-              <FaChevronRight className="ms-1" />
-            </a>
-          </Col>
-        </Row>
-      </Container>
-      <Container className="mt-3 ms-0 mb-4 d-flex justify-content-start">
-        <Row>
-          {events.slice(0, 3).map((event, index) => (
-            <Col key={index} className="d-flex align-items-center ">
-              <Card
-                className="me-3"
-                style={{ width: "18rem", height: "22rem" }}
-              >
-                <Card.Img
-                  variant="top"
-                  src={event.imageUrl}
-                  style={{ height: "12rem", objectFit: "cover" }}
-                />
-                <Card.Body>
-                  <Card.Text className="card-txt-date">
-                    <b>
-                      {event.date} • {event.time}
-                    </b>
-                  </Card.Text>
-                  <Card.Title>
-                    <b>{event.title}</b>
-                  </Card.Title>
-                  <Card.Text className="card-txt-location mb-3">
-                    <FaSearchLocation className="ms-1" />
-                    <span className="ms-1">
-                      <b>{event.address}</b>
-                    </span>
-                  </Card.Text>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <Button className="btn-color">Book Now</Button>
-                    <span className="yellow-txt me-3">
-                      <b>{event.price}</b>
-                    </span>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Container>
+      <Events />
       {/* Additional sections for Featured Items can follow the same pattern */}
     </>
   );
