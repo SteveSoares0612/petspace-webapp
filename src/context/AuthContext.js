@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   const [attachments, setAttachments] = useState([]);
 
 
-  const BASE_URL = "http://localhost:8000";
+  const BASE_URL = "http://petspaceapi.local";
 
   // Function to get the XSRF token
   const getCsrfToken = async () => {
