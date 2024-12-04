@@ -10,6 +10,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import "../managePets/ManagePets.css";
 import CustomModal  from "../../components/CustomModal";
+import previewImage from "../../assets/images/previewImage.jpg";
+
 
 function Family() {
   const {
@@ -134,8 +136,8 @@ function Family() {
                       <div className="d-flex align-items-center">
                         <div className="pet-image-col">
                           <img
-                            src={member.profile_image} // Ensure you have a valid image source
-                            alt={member.name}
+                            src={member?.profile_image || previewImage} // Ensure you have a valid image source
+                            alt={member?.name}
                             className="rounded-circle pet-image"
                             style={{ width: "5rem", height: "5rem" }}
                           />

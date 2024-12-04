@@ -4,8 +4,6 @@ import { Navbar, Nav, Container, Button, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import { useAuth } from "../context/AuthContext";
-import { FaSignOutAlt, FaSignInAlt, FaUserPlus } from "react-icons/fa";
-
 import ProfileIcon from "../assets/images/myprofileicon.png";
 import ImagePreview from "../assets/images/previewImage.jpg";
 import editPetsIcon from "../assets/images/editpets.png";
@@ -15,13 +13,27 @@ import RegisterIcon from "../assets/images/register.png";
 import LoginIcon from "../assets/images/login.png";
 
 function AppNavbar() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { getUser,loading, isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout(String(user.email));
+    logout(String(user?.email));
     navigate("/signin");
   };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <Navbar bg="light" expand="lg" className="py-3">
+        <Container>
+          <Navbar.Brand>Loading...</Navbar.Brand>
+        </Container>
+      </Navbar>
+    );
+  }
 
   return (
     <Navbar bg="light" expand="lg" className="py-3">
@@ -49,13 +61,13 @@ function AppNavbar() {
               <NavDropdown
                 title={<>
                   <img
-                    src={user.profile_image ? user.profile_image : ImagePreview}
+                    src={user?.profile_image ? user?.profile_image : ImagePreview}
                     alt="Profile"
                     className="me-2 rounded-circle"
                     width={24}
                     height={24}
                   />
-                  {`Welcome, ${user.first_name}`}
+                  {`Welcome, ${user?.first_name}`}
                 </>}
                 id="user-dropdown"
                 align="end"

@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         const data = response.data;
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.data));
         setUser(data.user);
         setIsAuthenticated(true);
         setAuthError(null); // Clear any existing error
@@ -159,6 +159,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       if (error.response) {
+        
         setAuthError(error.response.data.message || "Login failed");
       } else {
         setAuthError("An unexpected error occurred: " + error.message);
@@ -1344,8 +1345,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
+    getUser();
+  }, []);
+
+  const getUser = () => {
     setAuthError(null);
     const storedUser = localStorage.getItem("user");
 
@@ -1353,9 +1358,12 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true); // User is considered authenticated
       if (storedUser) {
         setUser(JSON.parse(storedUser)); // Set user data from localStorage
+        
       }
     }
-  }, []);
+    console.log("user",user)
+    setLoading(false);
+  }
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -1370,6 +1378,8 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated]);
 
   const values = {
+    getUser,
+    loading,
     isAuthenticated,
     login,
     signUp,
