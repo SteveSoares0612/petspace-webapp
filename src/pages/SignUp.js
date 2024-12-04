@@ -25,7 +25,7 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for button
   const navigate = useNavigate();
-  const { signUp, authError } = useAuth(); // Assume signUp comes from useAuth
+  const { signUp, authError, getUser } = useAuth(); // Assume signUp comes from useAuth
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -69,6 +69,7 @@ const SignUp = () => {
       // Use the success value to determine navigation
       if (success) {
         console.log("Registration successful, navigating to home");
+        getUser()
         navigate("/"); // Redirect to home page
       } else {
         console.log("Registration failed, not navigating");
