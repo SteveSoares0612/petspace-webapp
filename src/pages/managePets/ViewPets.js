@@ -1019,14 +1019,7 @@ function ViewPets() {
 
                     {/* Edit and Delete icons */}
                     <div className="d-flex">
-                      <span
-                        onClick={() =>
-                          handleShowModal("specialCondition", index)
-                        }
-                        className="ms-2 cursor-pointer text-pink"
-                      >
-                        <FaEdit style={{ cursor: "pointer" }} />
-                      </span>
+                  
                       <span
                         onClick={() => handleDeleteCondition(condition.id)}
                         className="ms-2 cursor-pointer text-danger"
