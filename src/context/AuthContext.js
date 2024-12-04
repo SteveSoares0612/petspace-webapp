@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   const [attachments, setAttachments] = useState([]);
 
 
-  const BASE_URL = "http://petspaceapi.local";
+  const BASE_URL = "http://api.petspace.local";
 
   // Function to get the XSRF token
   const getCsrfToken = async () => {
@@ -572,7 +572,7 @@ export const AuthProvider = ({ children }) => {
 
       // Send the image to the server
       const response = await axios.post(
-        "http://localhost:8000/web/account/change-avatar",
+        "http://api.petspace.local/web/account/change-avatar",
         formData,
         {
           headers: {
@@ -619,7 +619,7 @@ export const AuthProvider = ({ children }) => {
 
       // Send the image to the server
       const response = await axios.post(
-        "http://localhost:8000/web/pet/change-avatar",
+        "http://api.petspace.local/web/pet/change-avatar",
         formData,
         {
           headers: {
